@@ -8,6 +8,11 @@ Versioning policy:
 - **1.0.0** ships when all 11 phases land and `examples/claude_code_oauth_cosmium.rs` runs end-to-end against a live cosmium binary.
 
 ## [Unreleased]
+## [2.0.0] - Major bump + main branch + first crates.io publish
+
+- Branch policy: `main` becomes the default branch; `develop` is the integration branch.
+- crates.io: this tag fires the publish workflow (minor-or-major + tagged on `origin/main`). All publishable crates land on crates.io as `2.0.0`.
+- No source-level breaking changes vs 1.1.0; the major bump marks the publishing contract going public.
 ## [1.1.0] - First minor bump
 
 - All `1.0.x` patches consolidated into a stable minor release line.
