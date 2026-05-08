@@ -632,12 +632,12 @@ checksum = "a4ae5f15dda3c708c0ade84bfee31ccab44a3da4f88015ed22f63732abe300c8"
 
 [[package]]
 name = "deadpool"
-version = "0.10.0"
+version = "0.12.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "fb84100978c1c7b37f09ed3ce3e5f843af02c2a2c431bae5b19230dad2c1b490"
+checksum = "0be2b1d1d6ec8d846f05e137292d0b89133caf95ef33695424c09568bdd39b1b"
 dependencies = [
- "async-trait",
  "deadpool-runtime",
+ "lazy_static",
  "num_cpus",
  "tokio",
 ]
@@ -1771,7 +1771,7 @@ dependencies = [
 
 [[package]]
 name = "ras-agent"
-version = "1.0.1"
+version = "1.0.2"
 dependencies = [
  "async-trait",
  "chrono",
@@ -1803,7 +1803,7 @@ dependencies = [
 
 [[package]]
 name = "ras-browser"
-version = "1.0.1"
+version = "1.0.2"
 dependencies = [
  "async-trait",
  "ras-cdp",
@@ -1821,7 +1821,7 @@ dependencies = [
 
 [[package]]
 name = "ras-cdp"
-version = "1.0.1"
+version = "1.0.2"
 dependencies = [
  "async-trait",
  "chromiumoxide",
@@ -1840,7 +1840,7 @@ dependencies = [
 
 [[package]]
 name = "ras-cli"
-version = "1.0.1"
+version = "1.0.2"
 dependencies = [
  "anyhow",
  "clap",
@@ -1870,7 +1870,7 @@ dependencies = [
 
 [[package]]
 name = "ras-cloud"
-version = "1.0.1"
+version = "1.0.2"
 dependencies = [
  "async-trait",
  "ras-errors",
@@ -1887,7 +1887,7 @@ dependencies = [
 
 [[package]]
 name = "ras-config"
-version = "1.0.1"
+version = "1.0.2"
 dependencies = [
  "dotenvy",
  "once_cell",
@@ -1901,7 +1901,7 @@ dependencies = [
 
 [[package]]
 name = "ras-cosmium"
-version = "1.0.1"
+version = "1.0.2"
 dependencies = [
  "async-trait",
  "ras-cdp",
@@ -1918,7 +1918,7 @@ dependencies = [
 
 [[package]]
 name = "ras-daemon"
-version = "1.0.1"
+version = "1.0.2"
 dependencies = [
  "anyhow",
  "dotenvy",
@@ -1938,7 +1938,7 @@ dependencies = [
 
 [[package]]
 name = "ras-dom"
-version = "1.0.1"
+version = "1.0.2"
 dependencies = [
  "async-trait",
  "image",
@@ -1956,7 +1956,7 @@ dependencies = [
 
 [[package]]
 name = "ras-errors"
-version = "1.0.1"
+version = "1.0.2"
 dependencies = [
  "serde",
  "thiserror 2.0.18",
@@ -1964,7 +1964,7 @@ dependencies = [
 
 [[package]]
 name = "ras-events"
-version = "1.0.1"
+version = "1.0.2"
 dependencies = [
  "async-broadcast",
  "async-trait",
@@ -1982,7 +1982,7 @@ dependencies = [
 
 [[package]]
 name = "ras-filesystem"
-version = "1.0.1"
+version = "1.0.2"
 dependencies = [
  "async-trait",
  "ras-errors",
@@ -1997,7 +1997,7 @@ dependencies = [
 
 [[package]]
 name = "ras-judge"
-version = "1.0.1"
+version = "1.0.2"
 dependencies = [
  "async-trait",
  "image",
@@ -2012,7 +2012,7 @@ dependencies = [
 
 [[package]]
 name = "ras-llm"
-version = "1.0.1"
+version = "1.0.2"
 dependencies = [
  "async-trait",
  "ras-errors",
@@ -2026,7 +2026,7 @@ dependencies = [
 
 [[package]]
 name = "ras-llm-anthropic"
-version = "1.0.1"
+version = "1.0.2"
 dependencies = [
  "async-trait",
  "chrono",
@@ -2049,7 +2049,7 @@ dependencies = [
 
 [[package]]
 name = "ras-llm-bedrock"
-version = "1.0.1"
+version = "1.0.2"
 dependencies = [
  "async-trait",
  "ras-errors",
@@ -2066,7 +2066,7 @@ dependencies = [
 
 [[package]]
 name = "ras-llm-cerebras"
-version = "1.0.1"
+version = "1.0.2"
 dependencies = [
  "async-trait",
  "ras-errors",
@@ -2084,7 +2084,7 @@ dependencies = [
 
 [[package]]
 name = "ras-llm-cloud"
-version = "1.0.1"
+version = "1.0.2"
 dependencies = [
  "async-trait",
  "ras-errors",
@@ -2101,7 +2101,7 @@ dependencies = [
 
 [[package]]
 name = "ras-llm-deepseek"
-version = "1.0.1"
+version = "1.0.2"
 dependencies = [
  "async-trait",
  "ras-errors",
@@ -2119,7 +2119,7 @@ dependencies = [
 
 [[package]]
 name = "ras-llm-google"
-version = "1.0.1"
+version = "1.0.2"
 dependencies = [
  "async-trait",
  "ras-errors",
@@ -2136,7 +2136,7 @@ dependencies = [
 
 [[package]]
 name = "ras-llm-groq"
-version = "1.0.1"
+version = "1.0.2"
 dependencies = [
  "async-trait",
  "ras-errors",
@@ -2154,7 +2154,7 @@ dependencies = [
 
 [[package]]
 name = "ras-llm-langchain"
-version = "1.0.1"
+version = "1.0.2"
 dependencies = [
  "async-trait",
  "ras-errors",
@@ -2171,7 +2171,7 @@ dependencies = [
 
 [[package]]
 name = "ras-llm-mistral"
-version = "1.0.1"
+version = "1.0.2"
 dependencies = [
  "async-trait",
  "ras-errors",
@@ -2189,7 +2189,7 @@ dependencies = [
 
 [[package]]
 name = "ras-llm-oci"
-version = "1.0.1"
+version = "1.0.2"
 dependencies = [
  "async-trait",
  "ras-errors",
@@ -2206,7 +2206,7 @@ dependencies = [
 
 [[package]]
 name = "ras-llm-ollama"
-version = "1.0.1"
+version = "1.0.2"
 dependencies = [
  "async-trait",
  "ras-errors",
@@ -2223,7 +2223,7 @@ dependencies = [
 
 [[package]]
 name = "ras-llm-openai"
-version = "1.0.1"
+version = "1.0.2"
 dependencies = [
  "async-trait",
  "ras-errors",
@@ -2240,7 +2240,7 @@ dependencies = [
 
 [[package]]
 name = "ras-llm-openrouter"
-version = "1.0.1"
+version = "1.0.2"
 dependencies = [
  "async-trait",
  "ras-errors",
@@ -2258,7 +2258,7 @@ dependencies = [
 
 [[package]]
 name = "ras-llm-vercel"
-version = "1.0.1"
+version = "1.0.2"
 dependencies = [
  "async-trait",
  "ras-errors",
@@ -2276,7 +2276,7 @@ dependencies = [
 
 [[package]]
 name = "ras-mcp"
-version = "1.0.1"
+version = "1.0.2"
 dependencies = [
  "async-trait",
  "ras-errors",
@@ -2293,7 +2293,7 @@ dependencies = [
 
 [[package]]
 name = "ras-recording"
-version = "1.0.1"
+version = "1.0.2"
 dependencies = [
  "async-trait",
  "image",
@@ -2308,7 +2308,7 @@ dependencies = [
 
 [[package]]
 name = "ras-sandbox"
-version = "1.0.1"
+version = "1.0.2"
 dependencies = [
  "async-trait",
  "ras-errors",
@@ -2321,7 +2321,7 @@ dependencies = [
 
 [[package]]
 name = "ras-skills"
-version = "1.0.1"
+version = "1.0.2"
 dependencies = [
  "async-trait",
  "ras-errors",
@@ -2338,7 +2338,7 @@ dependencies = [
 
 [[package]]
 name = "ras-telemetry"
-version = "1.0.1"
+version = "1.0.2"
 dependencies = [
  "async-trait",
  "ras-errors",
@@ -2352,7 +2352,7 @@ dependencies = [
 
 [[package]]
 name = "ras-tokens"
-version = "1.0.1"
+version = "1.0.2"
 dependencies = [
  "async-trait",
  "chrono",
@@ -2370,7 +2370,7 @@ dependencies = [
 
 [[package]]
 name = "ras-tools"
-version = "1.0.1"
+version = "1.0.2"
 dependencies = [
  "async-trait",
  "indexmap",
@@ -2391,7 +2391,7 @@ dependencies = [
 
 [[package]]
 name = "ras-types"
-version = "1.0.1"
+version = "1.0.2"
 dependencies = [
  "chrono",
  "indexmap",
@@ -2407,7 +2407,7 @@ dependencies = [
 
 [[package]]
 name = "ras-validation"
-version = "1.0.1"
+version = "1.0.2"
 dependencies = [
  "async-trait",
  "ras-errors",
@@ -2421,7 +2421,7 @@ dependencies = [
 
 [[package]]
 name = "ras-watchdogs"
-version = "1.0.1"
+version = "1.0.2"
 dependencies = [
  "async-trait",
  "ras-browser",
@@ -3771,12 +3771,11 @@ dependencies = [
 
 [[package]]
 name = "wiremock"
-version = "0.6.2"
+version = "0.6.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "7fff469918e7ca034884c7fd8f93fe27bacb7fcb599fd879df6c7b429a29b646"
+checksum = "08db1edfb05d9b3c1542e521aea074442088292f00b5f28e435c714a98f85031"
 dependencies = [
  "assert-json-diff",
- "async-trait",
  "base64",
  "deadpool",
  "futures",
