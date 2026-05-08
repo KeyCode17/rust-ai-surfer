@@ -28,6 +28,6 @@ jobs:
           mkdir dist
           cp target/release/ras dist/ras-${{ matrix.target }}
           cp target/release/ras-daemon dist/ras-daemon-${{ matrix.target }}
-      - uses: softprops/action-gh-release@v2
+      - uses: softprops/action-gh-release@v3
         with:
           files: dist/*
