@@ -8,6 +8,12 @@ Versioning policy:
 - **1.0.0** ships when all 11 phases land and `examples/claude_code_oauth_cosmium.rs` runs end-to-end against a live cosmium binary.
 
 ## [Unreleased]
+## [0.11.0] - Phase 10 — MCP + sandbox + recording
+
+- `ras-sandbox`: `ShellSandbox` runs scripts via `sh -c` with `tokio::process::Command`, env injection, hard timeout via `tokio::time::timeout`.
+- `ras-recording`: `InMemoryRecorder` start/frame/stop with `RecordingState` tracking frame_count + started_at.
+- `ras-mcp`: `JsonRpcRequest` / `JsonRpcResponse::{ok, err}` (codes from MCP spec), stdio-line protocol primitives.
+- 7 tests pass.
 ## [0.10.0] - Phase 9 — CLI + daemon + cloud
 
 - `ras` CLI with subcommands: `run` (task + model + cdp_url + cosmium_binary + max_steps), `doctor` (check claude CLI + ANTHROPIC_API_KEY shadow + ~/.claude/.credentials.json), `login` (OAuth instructions), `version`.
