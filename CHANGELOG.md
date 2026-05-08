@@ -8,6 +8,9 @@ Versioning policy:
 - **1.0.0** ships when all 11 phases land and `examples/claude_code_oauth_cosmium.rs` runs end-to-end against a live cosmium binary.
 
 ## [Unreleased]
+## [1.0.0] - Full port complete
+
+All 11 phases shipped. Workspace at 39 crates, 50+ tests pass, end-to-end PoC builds. Major bump.
 ## [0.12.0] - Phase 11 — Examples + integration
 
 - `examples/claude_code_oauth_cosmium.rs` (★ port of the Python PoC): `ChatAnthropicClaudeCode::new(model)` + `resolve_attach_url(cdp_url)` + `ChromiumoxideAdapter::connect` + `RunAgent::execute`. Honors `RAS_MODEL`, `CDP_URL`, `TASK` env knobs.
