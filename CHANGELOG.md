@@ -8,6 +8,11 @@ Versioning policy:
 - **1.0.0** ships when all 11 phases land and `examples/claude_code_oauth_cosmium.rs` runs end-to-end against a live cosmium binary.
 
 ## [Unreleased]
+## [1.1.0] - First minor bump
+
+- All `1.0.x` patches consolidated into a stable minor release line.
+- crates.io publish workflow active but still gated to `origin/main` (not yet created).
+- Next: `2.0.0` will create `main` branch, set as default, and trigger the first crates.io publish.
 ## [1.0.5] - crates.io publish prep
 
 - Add `version = "1.0.5"` to all internal `[workspace.dependencies]` so `cargo publish` accepts the path deps.
