@@ -8,6 +8,11 @@ Versioning policy:
 - **1.0.0** ships when all 11 phases land and `examples/claude_code_oauth_cosmium.rs` runs end-to-end against a live cosmium binary.
 
 ## [Unreleased]
+## [1.0.5] - crates.io publish prep
+
+- Add `version = "1.0.5"` to all internal `[workspace.dependencies]` so `cargo publish` accepts the path deps.
+- Mark `ras-cli` and `ras-daemon` as `publish = false` (binaries; `cargo install` from git instead).
+- `publish.yml`: gate publish on (a) tagged commit reachable from `origin/main` AND (b) minor or major bump vs prior tag. Patch bumps and tags off non-main branches always skip crates.io.
 ## [1.0.4] - README refresh
 
 - Update `README.md`: add CI / release / license / Rust badges, expand "What's in the box" to reflect shipped capabilities, document CLI subcommands, link ADRs, document lefthook hook matrix, mention bump-gate flow.

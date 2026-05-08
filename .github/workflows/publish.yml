@@ -1,0 +1,91 @@
+name: publish
+
+on:
+  push:
+    tags:
+      - "v*.*.*"
+  workflow_dispatch:
+    inputs:
+      force:
+        description: "Force publish even on patch bumps"
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+jobs:
+  decide:
+    runs-on: ubuntu-latest
+    outputs:
+      should_publish: ${{ steps.gate.outputs.should_publish }}
+      version: ${{ steps.gate.outputs.version }}
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+      - id: gate
+        run: |
+          set -euo pipefail
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            VERSION=$(grep -m1 '^version' Cargo.toml | sed -E 's/.*"([^"]+)".*/\1/')
+            FORCE='${{ github.event.inputs.force }}'
+            echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+            if [ "$FORCE" = "true" ]; then
+              echo "should_publish=true" >> "$GITHUB_OUTPUT"
+              echo "[gate] manual run with force=true; publishing $VERSION"
+              exit 0
+            fi
+            TAG_SHA="$(git rev-parse HEAD)"
+          else
+            VERSION="${GITHUB_REF_NAME#v}"
+            echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+            TAG_SHA="$(git rev-list -n 1 "${GITHUB_REF_NAME}")"
+          fi
+
+          if ! git branch -r --contains "$TAG_SHA" | grep -qE '^\s*origin/main$'; then
+            echo "should_publish=false" >> "$GITHUB_OUTPUT"
+            echo "[gate] $VERSION not reachable from origin/main; skipping crates.io"
+            exit 0
+          fi
+
+          PREV=$(git tag --sort=-v:refname | grep -E '^v[0-9]+\.[0-9]+\.[0-9]+$' \
+                 | grep -v "^v$VERSION$" | head -n 1 || true)
+          PREV=${PREV#v}
+          if [ -z "$PREV" ]; then PREV="0.0.0"; fi
+
+          IFS=. read -r CX CY CZ <<<"$VERSION"
+          IFS=. read -r PX PY PZ <<<"$PREV"
+
+          if [ "$CX" -ne "$PX" ] || [ "$CY" -ne "$PY" ]; then
+            echo "should_publish=true" >> "$GITHUB_OUTPUT"
+            echo "[gate] $PREV -> $VERSION is minor or major (and on main); publishing"
+          else
+            echo "should_publish=false" >> "$GITHUB_OUTPUT"
+            echo "[gate] $PREV -> $VERSION is patch only; skipping crates.io"
+          fi
+
+  publish:
+    needs: decide
+    if: needs.decide.outputs.should_publish == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: dtolnay/rust-toolchain@1.85
+      - uses: Swatinem/rust-cache@v2
+      - run: cargo install cargo-workspaces --locked
+      - name: cargo workspaces publish
+        env:
+          CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
+        run: |
+          set -euo pipefail
+          if [ -z "${CARGO_REGISTRY_TOKEN:-}" ]; then
+            echo "::error::CARGO_REGISTRY_TOKEN secret is not set"
+            exit 1
+          fi
+          cargo workspaces publish \
+            --from-git \
+            --no-individual-tags \
+            --allow-dirty \
+            --yes \
+            skip
