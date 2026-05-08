@@ -51,7 +51,7 @@ exclude         = ["examples", "tests", "docs", "scripts"]
 default-members = ["ras-cli", "ras-daemon"]
 
 [workspace.package]
-version       = "1.0.1"
+version       = "1.0.2"
 edition       = "2024"
 rust-version  = "1.85"
 license       = "MIT"

@@ -8,6 +8,11 @@ Versioning policy:
 - **1.0.0** ships when all 11 phases land and `examples/claude_code_oauth_cosmium.rs` runs end-to-end against a live cosmium binary.
 
 ## [Unreleased]
+## [1.0.2] - CI release permissions + dependabot pin
+
+- `release.yml`: add `permissions: contents: write` so the workflow can attach binaries to manually-created releases.
+- `dependabot.yml`: ignore `sha2` major bumps (0.11 changed `Hasher` API), ignore `chromiumoxide` majors (0.8 has breaking API), ignore `dtolnay/rust-toolchain` action bumps (we pin via `rust-toolchain.toml`).
+- Closed open dependabot PRs that broke the build.
 ## [1.0.1] - CI fixes
 
 - Drop pedantic clippy from workspace lints (kept `unwrap_used = deny`, `dbg_macro = deny`).
