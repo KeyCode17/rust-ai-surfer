@@ -117,7 +117,7 @@ anyhow             = "1"
 tracing            = "0.1"
 tracing-subscriber = { version = "0.3", features = ["env-filter", "fmt"] }
 schemars           = "0.8"
-validator          = { version = "0.19", features = ["derive"] }
+validator          = { version = "0.20", features = ["derive"] }
 uuid               = { version = "1", features = ["v7", "serde"] }
 url                = { version = "2", features = ["serde"] }
 smol_str           = { version = "0.3", features = ["serde"] }
