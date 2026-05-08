@@ -8,6 +8,15 @@ Versioning policy:
 - **1.0.0** ships when all 11 phases land and `examples/claude_code_oauth_cosmium.rs` runs end-to-end against a live cosmium binary.
 
 ## [Unreleased]
+## [0.4.0] - Phase 3 — Agent step loop
+
+- `RunAgent` orchestrator + `RunStep` use case (LLM call + parse + history append + loop-detector update + step-interval tracking).
+- `compute_action_hash` with normalization rules (search strips `max_results`/`offset`, navigate strips query string).
+- `ActionLoopDetector` + `PageFingerprint` integrated; nudges built via `build_loop_nudge` and `build_budget_warning` (75% / 90% escalation).
+- `should_switch_to_fallback`: classifies `LlmRateLimited`/`LlmAuthExpired`/`LlmProviderError`/`CdpTimeout`/`BrowserDisconnected` for fallback LLM swap inside `RunStep::invoke_with_fallback`.
+- `UrlShortener` with map-backed shorten/restore (>= 80 char threshold, dedup).
+- `render_plan` produces `[x]/[>]/[ ]` markers for plan items.
+- 12 tests pass.
 
 ## [0.3.0] - Phase 2 — CDP + cosmium + ChatAnthropicClaudeCode
 
