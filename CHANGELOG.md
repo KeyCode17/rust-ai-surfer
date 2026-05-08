@@ -8,6 +8,11 @@ Versioning policy:
 - **1.0.0** ships when all 11 phases land and `examples/claude_code_oauth_cosmium.rs` runs end-to-end against a live cosmium binary.
 
 ## [Unreleased]
+## [2.1.0] - Dependency patches + publish workflow polish
+
+- Dependabot retargeted at `develop` (matches branch flow); `keyring` major bumps added to ignore list.
+- Patch bumps: `smol_str` 0.3.2 → 0.3.6, `image` 0.25.9 → 0.25.10.
+- `publish.yml`: `set +e -o pipefail` so cargo-search misses don't abort; treat `already exists on crates.io` as success; 420s sleep on 429 rate-limit; failed crates aggregated and reported at end.
 ## [2.0.0] - Major bump + main branch + crates.io publish
 
 - Pin Rust toolchain to **1.95.0** (latest stable as of 2026-04-16); CI workflows + audit + workspace `rust-version` all aligned. Profile `minimal` to skip `rust-docs`.

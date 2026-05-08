@@ -6,7 +6,7 @@ SUBJECT=$(head -n 1 "$MSG_FILE")
 if printf '%s\n' "$SUBJECT" | grep -qE '^(Merge|Revert)'; then
     exit 0
 fi
-if printf '%s\n' "$SUBJECT" | grep -qE '^(feat|fix|chore|docs|refactor|test|perf|build|ci|style|revert)(\([^)]+\))?!?: .+'; then
+if printf '%s\n' "$SUBJECT" | grep -qE '^(feat|fix|chore|docs|refactor|test|perf|build|ci|style|revert|release)(\([^)]+\))?!?: .+'; then
     exit 0
 fi
 echo "X commit subject must follow Conventional Commits"
