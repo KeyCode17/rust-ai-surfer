@@ -1,0 +1,30 @@
+[package]
+name                   = "ras-tools"
+description            = "Action registry and built-in browser actions"
+version.workspace      = true
+edition.workspace      = true
+rust-version.workspace = true
+license.workspace      = true
+repository.workspace   = true
+authors.workspace      = true
+
+[lints]
+workspace = true
+
+[dependencies]
+ras-errors  = { workspace = true }
+ras-types   = { workspace = true }
+ras-cdp     = { workspace = true }
+ras-dom     = { workspace = true }
+ras-events  = { workspace = true }
+async-trait = { workspace = true }
+serde       = { workspace = true }
+serde_json  = { workspace = true }
+schemars    = { workspace = true }
+indexmap    = { workspace = true }
+thiserror   = { workspace = true }
+tokio       = { workspace = true }
+tracing     = { workspace = true }
+url         = { workspace = true }
+regex       = { workspace = true }
+

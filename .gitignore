@@ -1,0 +1,14 @@
+target/
+**/*.rs.bk
+*.pdb
+.env
+.env.local
+.DS_Store
+.idea/
+.vscode/
+*.log
+*.swp
+*.swo
+.direnv/
+result
+.cargo-cache/

@@ -1,0 +1,24 @@
+[package]
+name                   = "ras-events"
+description            = "Tokio broadcast event bus"
+version.workspace      = true
+edition.workspace      = true
+rust-version.workspace = true
+license.workspace      = true
+repository.workspace   = true
+authors.workspace      = true
+
+[lints]
+workspace = true
+
+[dependencies]
+ras-errors      = { workspace = true }
+ras-types       = { workspace = true }
+async-trait     = { workspace = true }
+async-broadcast = { workspace = true }
+tokio           = { workspace = true }
+tokio-util      = { workspace = true }
+futures         = { workspace = true }
+thiserror       = { workspace = true }
+tracing         = { workspace = true }
+

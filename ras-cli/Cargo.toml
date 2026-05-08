@@ -1,0 +1,51 @@
+[package]
+name                   = "ras-cli"
+description            = "rust-ai-surfer command line interface"
+version.workspace      = true
+edition.workspace      = true
+rust-version.workspace = true
+license.workspace      = true
+repository.workspace   = true
+authors.workspace      = true
+
+[lints]
+workspace = true
+
+[[bin]]
+name = "ras"
+path = "src/main.rs"
+
+[features]
+default               = ["anthropic-claude-code", "cosmium-launcher"]
+anthropic-claude-code = ["ras-llm-anthropic/claude-code"]
+cosmium-launcher      = []
+mcp                   = ["dep:ras-mcp"]
+cloud                 = ["dep:ras-cloud"]
+
+[dependencies]
+ras-errors         = { workspace = true }
+ras-types          = { workspace = true }
+ras-config         = { workspace = true }
+ras-validation     = { workspace = true }
+ras-agent          = { workspace = true }
+ras-browser        = { workspace = true }
+ras-cdp            = { workspace = true }
+ras-cosmium        = { workspace = true }
+ras-llm            = { workspace = true }
+ras-llm-anthropic  = { workspace = true }
+ras-tools          = { workspace = true }
+ras-mcp            = { workspace = true, optional = true }
+ras-cloud          = { workspace = true, optional = true }
+clap               = { workspace = true }
+tokio              = { workspace = true }
+serde              = { workspace = true }
+serde_json         = { workspace = true }
+thiserror          = { workspace = true }
+anyhow             = { workspace = true }
+tracing            = { workspace = true }
+tracing-subscriber = { workspace = true }
+dotenvy            = { workspace = true }
+url                = { workspace = true }
+
+[dev-dependencies]
+walkdir = { workspace = true }

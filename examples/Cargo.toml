@@ -1,0 +1,23 @@
+[package]
+name         = "ras-examples"
+description  = "rust-ai-surfer runnable PoCs"
+version      = "0.0.0"
+edition      = "2024"
+license      = "MIT"
+publish      = false
+
+[[example]]
+name = "claude_code_oauth_cosmium"
+path = "claude_code_oauth_cosmium.rs"
+
+[dependencies]
+anyhow             = "1"
+tokio              = { version = "1", features = ["full"] }
+tracing            = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter", "fmt"] }
+ras-agent          = { path = "../ras-agent" }
+ras-browser        = { path = "../ras-browser" }
+ras-cdp            = { path = "../ras-cdp" }
+ras-cosmium        = { path = "../ras-cosmium" }
+ras-llm            = { path = "../ras-llm" }
+ras-llm-anthropic  = { path = "../ras-llm-anthropic", features = ["claude-code"] }

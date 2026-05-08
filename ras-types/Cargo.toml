@@ -1,0 +1,25 @@
+[package]
+name                   = "ras-types"
+description            = "Shared types and ID newtypes"
+version.workspace      = true
+edition.workspace      = true
+rust-version.workspace = true
+license.workspace      = true
+repository.workspace   = true
+authors.workspace      = true
+
+[lints]
+workspace = true
+
+[dependencies]
+ras-errors = { workspace = true }
+serde      = { workspace = true }
+serde_json = { workspace = true }
+uuid       = { workspace = true }
+url        = { workspace = true }
+chrono     = { workspace = true }
+smol_str   = { workspace = true }
+indexmap   = { workspace = true }
+schemars   = { workspace = true }
+thiserror  = { workspace = true }
+

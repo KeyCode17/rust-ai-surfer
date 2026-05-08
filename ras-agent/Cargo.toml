@@ -1,0 +1,40 @@
+[package]
+name                   = "ras-agent"
+description            = "Agent step loop, history, plan, rerun orchestration"
+version.workspace      = true
+edition.workspace      = true
+rust-version.workspace = true
+license.workspace      = true
+repository.workspace   = true
+authors.workspace      = true
+
+[lints]
+workspace = true
+
+[dependencies]
+ras-errors      = { workspace = true }
+ras-types       = { workspace = true }
+ras-events      = { workspace = true }
+ras-cdp         = { workspace = true }
+ras-browser     = { workspace = true }
+ras-dom         = { workspace = true }
+ras-tools       = { workspace = true }
+ras-watchdogs   = { workspace = true }
+ras-filesystem  = { workspace = true }
+ras-llm         = { workspace = true }
+ras-tokens      = { workspace = true }
+ras-judge       = { workspace = true }
+ras-telemetry   = { workspace = true }
+async-trait     = { workspace = true }
+tokio           = { workspace = true }
+tokio-util      = { workspace = true }
+serde           = { workspace = true }
+serde_json      = { workspace = true }
+thiserror       = { workspace = true }
+tracing         = { workspace = true }
+url             = { workspace = true }
+uuid            = { workspace = true }
+sha2            = { workspace = true }
+indexmap        = { workspace = true }
+chrono          = { workspace = true }
+

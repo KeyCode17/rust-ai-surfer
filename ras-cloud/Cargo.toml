@@ -1,0 +1,26 @@
+[package]
+name                   = "ras-cloud"
+description            = "Cloud browser client and OAuth device flow"
+version.workspace      = true
+edition.workspace      = true
+rust-version.workspace = true
+license.workspace      = true
+repository.workspace   = true
+authors.workspace      = true
+
+[lints]
+workspace = true
+
+[dependencies]
+ras-errors  = { workspace = true }
+ras-types   = { workspace = true }
+async-trait = { workspace = true }
+reqwest     = { workspace = true }
+tokio       = { workspace = true }
+serde       = { workspace = true }
+serde_json  = { workspace = true }
+thiserror   = { workspace = true }
+tracing     = { workspace = true }
+url         = { workspace = true }
+uuid        = { workspace = true }
+

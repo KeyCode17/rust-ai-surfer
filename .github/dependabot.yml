@@ -1,0 +1,21 @@
+version: 2
+updates:
+  - package-ecosystem: cargo
+    directory: /
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 5
+    groups:
+      tokio-stack:
+        patterns:
+          - "tokio*"
+          - "futures*"
+      llm-stack:
+        patterns:
+          - "reqwest*"
+          - "serde*"
+          - "schemars*"
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: monthly

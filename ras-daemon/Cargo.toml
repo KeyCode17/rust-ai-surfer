@@ -1,0 +1,31 @@
+[package]
+name                   = "ras-daemon"
+description            = "rust-ai-surfer long-running session daemon"
+version.workspace      = true
+edition.workspace      = true
+rust-version.workspace = true
+license.workspace      = true
+repository.workspace   = true
+authors.workspace      = true
+
+[lints]
+workspace = true
+
+[[bin]]
+name = "ras-daemon"
+path = "src/main.rs"
+
+[dependencies]
+ras-errors         = { workspace = true }
+ras-types          = { workspace = true }
+ras-config         = { workspace = true }
+ras-browser        = { workspace = true }
+ras-cdp            = { workspace = true }
+tokio              = { workspace = true }
+tokio-util         = { workspace = true }
+serde              = { workspace = true }
+serde_json         = { workspace = true }
+thiserror          = { workspace = true }
+anyhow             = { workspace = true }
+tracing            = { workspace = true }
+tracing-subscriber = { workspace = true }

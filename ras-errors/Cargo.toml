@@ -1,0 +1,17 @@
+[package]
+name                   = "ras-errors"
+description            = "Centralized AppError for rust-ai-surfer"
+version.workspace      = true
+edition.workspace      = true
+rust-version.workspace = true
+license.workspace      = true
+repository.workspace   = true
+authors.workspace      = true
+
+[lints]
+workspace = true
+
+[dependencies]
+serde     = { workspace = true }
+thiserror = { workspace = true }
+

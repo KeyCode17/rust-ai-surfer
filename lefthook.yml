@@ -1,0 +1,35 @@
+assert_lefthook_installed: true
+
+pre-commit:
+  parallel: true
+  commands:
+    fmt:
+      glob: "*.rs"
+      run: cargo fmt --all -- --check
+    clippy:
+      glob: "*.rs"
+      run: cargo clippy --workspace --all-targets -- -D warnings
+    loc-check:
+      glob: "*.rs"
+      run: bash scripts/check-loc.sh {staged_files}
+    forbid-comments:
+      glob: "*.rs"
+      run: bash scripts/check-no-comments.sh {staged_files}
+    forbid-unwrap:
+      glob: "*.rs"
+      run: bash scripts/check-no-unwrap.sh {staged_files}
+
+pre-push:
+  parallel: false
+  commands:
+    test:
+      run: cargo nextest run --workspace --no-fail-fast
+    doc:
+      run: cargo doc --workspace --no-deps --document-private-items
+    bump-gate:
+      run: bash scripts/bump-gate.sh
+
+commit-msg:
+  commands:
+    conventional:
+      run: bash scripts/check-commit-msg.sh {1}
