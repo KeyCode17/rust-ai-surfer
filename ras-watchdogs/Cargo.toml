@@ -16,6 +16,7 @@ ras-errors  = { workspace = true }
 ras-types   = { workspace = true }
 ras-cdp     = { workspace = true }
 ras-events  = { workspace = true }
+ras-browser = { workspace = true }
 async-trait = { workspace = true }
 tokio       = { workspace = true }
 tokio-util  = { workspace = true }

@@ -8,6 +8,11 @@ Versioning policy:
 - **1.0.0** ships when all 11 phases land and `examples/claude_code_oauth_cosmium.rs` runs end-to-end against a live cosmium binary.
 
 ## [Unreleased]
+## [0.7.0] - Phase 6 — Watchdogs + event bus
+
+- 4 watchdog impls: `SecurityWatchdog` (allowed/prohibited domains + IP block, IPv6 bracket-aware), `PopupsWatchdog`, `CrashWatchdog`, `DownloadsWatchdog`.
+- Each watchdog spawns a tokio task on attach, listens to BroadcastBus, exits on cancel token.
+- 7 tests pass.
 ## [0.6.0] - Phase 5 — DOM extraction primitives
 
 - `filter_dynamic_classes`: drops state classes (is-active, hover, focus, ...), hashed (css-, sc-, emotion-), long-digit-runs, BEM-modifier-with-uppercase patterns; dedup + sort.
