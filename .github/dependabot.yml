@@ -2,6 +2,7 @@ version: 2
 updates:
   - package-ecosystem: cargo
     directory: /
+    target-branch: "develop"
     schedule:
       interval: weekly
     open-pull-requests-limit: 5
@@ -11,6 +12,8 @@ updates:
       - dependency-name: "chromiumoxide"
         update-types: ["version-update:semver-major"]
       - dependency-name: "schemars"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "keyring"
         update-types: ["version-update:semver-major"]
       - dependency-name: "validator"
       - dependency-name: "wiremock"
@@ -26,6 +29,7 @@ updates:
           - "schemars*"
   - package-ecosystem: github-actions
     directory: /
+    target-branch: "develop"
     schedule:
       interval: monthly
     ignore:
