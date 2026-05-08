@@ -8,6 +8,11 @@ Versioning policy:
 - **1.0.0** ships when all 11 phases land and `examples/claude_code_oauth_cosmium.rs` runs end-to-end against a live cosmium binary.
 
 ## [Unreleased]
+## [0.10.0] - Phase 9 — CLI + daemon + cloud
+
+- `ras` CLI with subcommands: `run` (task + model + cdp_url + cosmium_binary + max_steps), `doctor` (check claude CLI + ANTHROPIC_API_KEY shadow + ~/.claude/.credentials.json), `login` (OAuth instructions), `version`.
+- `ras-daemon` Unix-socket listener at `$XDG_RUNTIME_DIR/ras-daemon.sock`; JSON-line protocol with Ping / Status / Shutdown.
+- `HttpCloudClient` provisions cloud browsers via `POST /v1/browsers`, releases via `DELETE /v1/browsers/{id}`.
 ## [0.9.0] - Phase 8 — FileSystem
 
 - `normalize_csv` (RFC 4180): quote fields with commas / quotes / newlines, escape internal quotes via doubling, strip leading/trailing blank lines, fields starting with `"` parsed as quoted.
