@@ -1949,6 +1949,7 @@ dependencies = [
  "sha2",
  "thiserror 2.0.18",
  "tracing",
+ "url",
 ]
 
 [[package]]
@@ -1968,10 +1969,13 @@ dependencies = [
  "futures",
  "ras-errors",
  "ras-types",
+ "serde",
+ "serde_json",
  "thiserror 2.0.18",
  "tokio",
  "tokio-util",
  "tracing",
+ "url",
 ]
 
 [[package]]
@@ -2000,6 +2004,7 @@ dependencies = [
  "serde",
  "serde_json",
  "thiserror 2.0.18",
+ "url",
 ]
 
 [[package]]
@@ -2340,6 +2345,7 @@ dependencies = [
 name = "ras-tokens"
 version = "0.1.0"
 dependencies = [
+ "async-trait",
  "chrono",
  "once_cell",
  "ras-errors",

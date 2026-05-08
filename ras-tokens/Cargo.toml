@@ -14,8 +14,9 @@ workspace = true
 [dependencies]
 ras-errors = { workspace = true }
 ras-types  = { workspace = true }
-ras-llm    = { workspace = true }
-reqwest    = { workspace = true }
+ras-llm     = { workspace = true }
+async-trait = { workspace = true }
+reqwest     = { workspace = true }
 tokio      = { workspace = true }
 serde      = { workspace = true }
 serde_json = { workspace = true }
