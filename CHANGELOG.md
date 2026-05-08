@@ -8,6 +8,13 @@ Versioning policy:
 - **1.0.0** ships when all 11 phases land and `examples/claude_code_oauth_cosmium.rs` runs end-to-end against a live cosmium binary.
 
 ## [Unreleased]
+## [0.6.0] - Phase 5 — DOM extraction primitives
+
+- `filter_dynamic_classes`: drops state classes (is-active, hover, focus, ...), hashed (css-, sc-, emotion-), long-digit-runs, BEM-modifier-with-uppercase patterns; dedup + sort.
+- `stable_hash`: parent_xpath + tag + id + role + filtered_classes + ax_name -> Sha256. Stable across CSS-in-JS class hash churn.
+- `remove_occluded`: paint-order rect union with reverse traversal; later-painted boxes mask earlier ones.
+- `detect_skeleton`: total_elements > 20 AND text_chars < total_elements * 5.
+- 13 tests pass.
 ## [0.5.0] - Phase 4 — Tools registry + built-ins
 
 - 8 default actions: navigate, click_element, click_coordinate, type_text, scroll, screenshot, wait, done.
