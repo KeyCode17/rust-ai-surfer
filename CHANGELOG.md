@@ -8,6 +8,10 @@ Versioning policy:
 - **1.0.0** ships when all 11 phases land and `examples/claude_code_oauth_cosmium.rs` runs end-to-end against a live cosmium binary.
 
 ## [Unreleased]
+## [0.12.0] - Phase 11 — Examples + integration
+
+- `examples/claude_code_oauth_cosmium.rs` (★ port of the Python PoC): `ChatAnthropicClaudeCode::new(model)` + `resolve_attach_url(cdp_url)` + `ChromiumoxideAdapter::connect` + `RunAgent::execute`. Honors `RAS_MODEL`, `CDP_URL`, `TASK` env knobs.
+- Workspace builds clean; example builds clean. Total tests across the workspace: 50+ unit/integration.
 ## [0.11.0] - Phase 10 — MCP + sandbox + recording
 
 - `ras-sandbox`: `ShellSandbox` runs scripts via `sh -c` with `tokio::process::Command`, env injection, hard timeout via `tokio::time::timeout`.
