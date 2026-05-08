@@ -8,6 +8,12 @@ Versioning policy:
 - **1.0.0** ships when all 11 phases land and `examples/claude_code_oauth_cosmium.rs` runs end-to-end against a live cosmium binary.
 
 ## [Unreleased]
+## [0.9.0] - Phase 8 — FileSystem
+
+- `normalize_csv` (RFC 4180): quote fields with commas / quotes / newlines, escape internal quotes via doubling, strip leading/trailing blank lines, fields starting with `"` parsed as quoted.
+- `parse_filename` regex `^[A-Za-z0-9_\-]+\.[A-Za-z0-9]+$`; rejects path separators + unsupported extensions; `sanitize` replaces spaces with `_` and drops disallowed chars.
+- `LocalFileSystem` (FileSystemPort impl): tokio::fs-backed read/write/append/list/snapshot, csv-extension auto-normalize on write, list filters to known extensions only.
+- 15 tests pass.
 ## [0.8.0] - Phase 7 — LLM providers + token cost
 
 - ras-llm-openai: `ChatOpenAICompatible` + `OpenAiAuth::{Bearer, Header}` covering OpenAI plus all OpenAI-compatible providers (groq, cerebras, deepseek, mistral, openrouter, vercel) via re-exports.
