@@ -44,9 +44,10 @@ fn done_action_metadata_terminates_sequence() {
     register_default_actions(&mut r).expect("register");
     let done = r.get(&ActionName("done".into())).expect("done");
     assert!(done.metadata.terminates_sequence);
-    assert!(r
-        .get(&ActionName("type_text".into()))
-        .is_some_and(|a| !a.metadata.terminates_sequence));
+    assert!(
+        r.get(&ActionName("type_text".into()))
+            .is_some_and(|a| !a.metadata.terminates_sequence)
+    );
 }
 
 #[test]

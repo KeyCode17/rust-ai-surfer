@@ -23,10 +23,7 @@ fn normalize_for_hash(name: &ActionName, params: &serde_json::Value) -> String {
             }
             "navigate" => {
                 if let Some(url) = obj.get("url").and_then(|v| v.as_str()) {
-                    obj.insert(
-                        "url".into(),
-                        serde_json::Value::String(strip_query(url)),
-                    );
+                    obj.insert("url".into(), serde_json::Value::String(strip_query(url)));
                 }
             }
             _ => {}
@@ -36,5 +33,9 @@ fn normalize_for_hash(name: &ActionName, params: &serde_json::Value) -> String {
 }
 
 fn strip_query(url: &str) -> String {
-    url.split('?').next().unwrap_or(url).trim_end_matches('/').to_string()
+    url.split('?')
+        .next()
+        .unwrap_or(url)
+        .trim_end_matches('/')
+        .to_string()
 }

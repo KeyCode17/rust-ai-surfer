@@ -25,7 +25,18 @@ pub struct BrowserSession {
 
 impl BrowserSession {
     #[must_use]
-    pub fn new(agent: AgentId, session: SessionId, mode: SessionMode, profile: BrowserProfile) -> Self {
-        Self { agent, session, mode, profile, state: SessionState::Disconnected }
+    pub fn new(
+        agent: AgentId,
+        session: SessionId,
+        mode: SessionMode,
+        profile: BrowserProfile,
+    ) -> Self {
+        Self {
+            agent,
+            session,
+            mode,
+            profile,
+            state: SessionState::Disconnected,
+        }
     }
 }

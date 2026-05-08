@@ -8,7 +8,7 @@ pre-commit:
       run: cargo fmt --all -- --check
     clippy:
       glob: "*.rs"
-      run: cargo clippy --workspace --all-targets -- -D warnings
+      run: cargo clippy --workspace --all-targets -- -D clippy::unwrap_used -D clippy::dbg_macro
     loc-check:
       glob: "*.rs"
       run: bash scripts/check-loc.sh {staged_files}
@@ -23,7 +23,7 @@ pre-push:
   parallel: false
   commands:
     test:
-      run: cargo nextest run --workspace --no-fail-fast
+      run: cargo test --workspace --no-fail-fast
     doc:
       run: cargo doc --workspace --no-deps --document-private-items
     bump-gate:

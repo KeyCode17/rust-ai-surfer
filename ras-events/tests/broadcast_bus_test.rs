@@ -30,7 +30,9 @@ async fn multiple_subscribers_each_receive() {
     let bus = Arc::new(BroadcastBus::new(16));
     let mut a = bus.subscribe();
     let mut b = bus.subscribe();
-    bus.publish(BrowserEvent::DialogDismissed).await.expect("publish");
+    bus.publish(BrowserEvent::DialogDismissed)
+        .await
+        .expect("publish");
     let _ = a.recv().await.expect("a recv");
     let _ = b.recv().await.expect("b recv");
 }

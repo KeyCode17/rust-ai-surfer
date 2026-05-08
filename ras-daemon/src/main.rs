@@ -49,10 +49,22 @@ async fn handle(stream: tokio::net::UnixStream) {
         return;
     }
     let response = match serde_json::from_str::<Request>(line.trim()) {
-        Ok(Request::Ping) => Response { ok: true, message: "pong".into() },
-        Ok(Request::Status) => Response { ok: true, message: "ready".into() },
-        Ok(Request::Shutdown) => Response { ok: true, message: "shutting down".into() },
-        Err(e) => Response { ok: false, message: format!("parse: {e}") },
+        Ok(Request::Ping) => Response {
+            ok: true,
+            message: "pong".into(),
+        },
+        Ok(Request::Status) => Response {
+            ok: true,
+            message: "ready".into(),
+        },
+        Ok(Request::Shutdown) => Response {
+            ok: true,
+            message: "shutting down".into(),
+        },
+        Err(e) => Response {
+            ok: false,
+            message: format!("parse: {e}"),
+        },
     };
     let body = serde_json::to_string(&response).unwrap_or_else(|_| "{}".into());
     let _ = tx.write_all(body.as_bytes()).await;

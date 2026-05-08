@@ -71,7 +71,10 @@ pub fn to_dto_messages(messages: Vec<ChatMessage>) -> Vec<ChatMessageDto> {
 
 fn map_one(m: ChatMessage) -> ChatMessageDto {
     match m {
-        ChatMessage::System(s) => ChatMessageDto { role: "system".into(), content: serde_json::Value::String(s.content) },
+        ChatMessage::System(s) => ChatMessageDto {
+            role: "system".into(),
+            content: serde_json::Value::String(s.content),
+        },
         ChatMessage::User(u) => {
             let parts: Vec<serde_json::Value> = u
                 .content
@@ -88,7 +91,10 @@ fn map_one(m: ChatMessage) -> ChatMessageDto {
                     }),
                 })
                 .collect();
-            ChatMessageDto { role: "user".into(), content: serde_json::Value::Array(parts) }
+            ChatMessageDto {
+                role: "user".into(),
+                content: serde_json::Value::Array(parts),
+            }
         }
         ChatMessage::Assistant(a) => ChatMessageDto {
             role: "assistant".into(),
@@ -113,7 +119,11 @@ pub fn response_to_chat(r: ChatCompletionResponse) -> ChatResponse {
         for t in c.message.tool_calls {
             let args: serde_json::Value =
                 serde_json::from_str(&t.function.arguments).unwrap_or(serde_json::Value::Null);
-            tool_calls.push(ToolCall { id: t.id, name: t.function.name, arguments: args });
+            tool_calls.push(ToolCall {
+                id: t.id,
+                name: t.function.name,
+                arguments: args,
+            });
         }
         finish = match c.finish_reason.as_deref() {
             Some("stop") | None => FinishReason::Stop,
@@ -123,7 +133,11 @@ pub fn response_to_chat(r: ChatCompletionResponse) -> ChatResponse {
             _ => FinishReason::Stop,
         };
     }
-    let _assistant = AssistantMessage { content: content.clone(), tool_calls: tool_calls.clone(), cache: false };
+    let _assistant = AssistantMessage {
+        content: content.clone(),
+        tool_calls: tool_calls.clone(),
+        cache: false,
+    };
     ChatResponse {
         content,
         tool_calls,

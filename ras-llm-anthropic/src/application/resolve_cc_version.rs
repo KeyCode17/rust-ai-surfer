@@ -3,7 +3,11 @@ use regex::Regex;
 use crate::domain::cc_version::{CcVersion, FALLBACK_CC_VERSION};
 
 pub async fn resolve_cc_version() -> CcVersion {
-    let Ok(out) = tokio::process::Command::new("claude").arg("--version").output().await else {
+    let Ok(out) = tokio::process::Command::new("claude")
+        .arg("--version")
+        .output()
+        .await
+    else {
         return CcVersion::fallback();
     };
     if !out.status.success() {
@@ -16,5 +20,6 @@ pub async fn resolve_cc_version() -> CcVersion {
     let Some(m) = re.find(&stdout) else {
         return CcVersion::fallback();
     };
-    CcVersion::new(m.as_str()).unwrap_or_else(|_| CcVersion::new(FALLBACK_CC_VERSION).unwrap_or_default())
+    CcVersion::new(m.as_str())
+        .unwrap_or_else(|_| CcVersion::new(FALLBACK_CC_VERSION).unwrap_or_default())
 }

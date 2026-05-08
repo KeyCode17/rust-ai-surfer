@@ -11,6 +11,6 @@ fi
 
 echo "[bump-gate] $LAST_VER -> $ROOT_VER"
 cargo build --workspace --all-targets
-cargo nextest run --workspace --no-fail-fast
+cargo test --workspace --no-fail-fast
 cargo run -p ras-cli -- --help >/dev/null
 echo "[bump-gate] OK"

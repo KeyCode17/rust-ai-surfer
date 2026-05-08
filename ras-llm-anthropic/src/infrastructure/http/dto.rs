@@ -1,6 +1,4 @@
-use ras_llm::{
-    AssistantMessage, ChatMessage, ContentPart, FinishReason, ToolCall, Usage,
-};
+use ras_llm::{AssistantMessage, ChatMessage, ContentPart, FinishReason, ToolCall, Usage};
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Serialize)]
@@ -49,8 +47,14 @@ pub struct AnthropicMessagesResponse {
 #[derive(Debug, Deserialize)]
 #[serde(tag = "type", rename_all = "snake_case")]
 pub enum AnthropicResponseContent {
-    Text { text: String },
-    ToolUse { id: String, name: String, input: serde_json::Value },
+    Text {
+        text: String,
+    },
+    ToolUse {
+        id: String,
+        name: String,
+        input: serde_json::Value,
+    },
 }
 
 #[derive(Debug, Deserialize)]
@@ -80,14 +84,21 @@ pub fn split_messages(messages: Vec<ChatMessage>) -> (Option<String>, Vec<Anthro
             }
             ChatMessage::User(u) => out.push(AnthropicMessage {
                 role: "user".into(),
-                content: u.content.into_iter().map(content_part_to_anthropic).collect(),
+                content: u
+                    .content
+                    .into_iter()
+                    .map(content_part_to_anthropic)
+                    .collect(),
             }),
             ChatMessage::Assistant(a) => {
                 let mut parts = Vec::new();
                 if let Some(t) = a.content {
                     parts.push(AnthropicContent::Text { text: t });
                 }
-                out.push(AnthropicMessage { role: "assistant".into(), content: parts });
+                out.push(AnthropicMessage {
+                    role: "assistant".into(),
+                    content: parts,
+                });
             }
             ChatMessage::Tool(t) => out.push(AnthropicMessage {
                 role: "user".into(),
@@ -122,7 +133,11 @@ pub fn response_to_chat(
         match c {
             AnthropicResponseContent::Text { text: t } => text.push_str(&t),
             AnthropicResponseContent::ToolUse { id, name, input } => {
-                tool_calls.push(ToolCall { id, name, arguments: input });
+                tool_calls.push(ToolCall {
+                    id,
+                    name,
+                    arguments: input,
+                });
             }
         }
     }

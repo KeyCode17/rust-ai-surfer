@@ -3,16 +3,28 @@ use ras_llm::{ChatMessage, ContentPart, SystemMessage};
 use crate::domain::billing_header::BillingHeader;
 
 #[must_use]
-pub fn inject_billing_header(messages: Vec<ChatMessage>, header: &BillingHeader) -> Vec<ChatMessage> {
+pub fn inject_billing_header(
+    messages: Vec<ChatMessage>,
+    header: &BillingHeader,
+) -> Vec<ChatMessage> {
     let billing = header.as_str().to_string();
     let mut out = messages;
     match out.first().cloned() {
         Some(ChatMessage::System(first)) => {
             let merged = format!("{billing}\n\n{}", first.content);
-            out[0] = ChatMessage::System(SystemMessage { content: merged, cache: first.cache });
+            out[0] = ChatMessage::System(SystemMessage {
+                content: merged,
+                cache: first.cache,
+            });
         }
         _ => {
-            out.insert(0, ChatMessage::System(SystemMessage { content: billing, cache: false }));
+            out.insert(
+                0,
+                ChatMessage::System(SystemMessage {
+                    content: billing,
+                    cache: false,
+                }),
+            );
         }
     }
     out

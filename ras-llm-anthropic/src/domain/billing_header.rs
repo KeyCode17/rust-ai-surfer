@@ -29,8 +29,14 @@ pub fn default_headers(version: &CcVersion) -> Vec<(&'static str, String)> {
     vec![
         ("anthropic-version", ANTHROPIC_VERSION.to_string()),
         ("anthropic-beta", OAUTH_BETA.to_string()),
-        ("anthropic-dangerous-direct-browser-access", "true".to_string()),
-        ("user-agent", format!("claude-cli/{} (external, cli)", version.as_str())),
+        (
+            "anthropic-dangerous-direct-browser-access",
+            "true".to_string(),
+        ),
+        (
+            "user-agent",
+            format!("claude-cli/{} (external, cli)", version.as_str()),
+        ),
         ("x-app", "cli".to_string()),
     ]
 }

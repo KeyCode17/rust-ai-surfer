@@ -17,9 +17,6 @@ pub struct CloudSession {
 pub trait CloudClient: Send + Sync + 'static {
     async fn start_device_auth(&self) -> Result<DeviceAuth, AppError>;
     async fn poll_token(&self, device_code: &str) -> Result<String, AppError>;
-    async fn provision_browser(
-        &self,
-        region: Option<String>,
-    ) -> Result<CloudSession, AppError>;
+    async fn provision_browser(&self, region: Option<String>) -> Result<CloudSession, AppError>;
     async fn release_browser(&self, session_id: &str) -> Result<(), AppError>;
 }

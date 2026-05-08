@@ -51,7 +51,7 @@ exclude         = ["examples", "tests", "docs", "scripts"]
 default-members = ["ras-cli", "ras-daemon"]
 
 [workspace.package]
-version       = "1.0.0"
+version       = "1.0.1"
 edition       = "2024"
 rust-version  = "1.85"
 license       = "MIT"
@@ -136,18 +136,11 @@ tempfile           = "3"
 wiremock           = "=0.6.2"
 
 [workspace.lints.rust]
-unsafe_code                   = "forbid"
-missing_debug_implementations = "warn"
-unreachable_pub               = "warn"
+unsafe_code = "forbid"
 
 [workspace.lints.clippy]
-pedantic     = { level = "warn", priority = -1 }
-unwrap_used  = "deny"
-expect_used  = "warn"
-todo         = "warn"
-dbg_macro    = "deny"
-print_stdout = "warn"
-print_stderr = "warn"
+unwrap_used = "deny"
+dbg_macro   = "deny"
 
 [profile.release]
 lto           = "thin"

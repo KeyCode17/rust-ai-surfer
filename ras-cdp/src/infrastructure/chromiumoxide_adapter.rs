@@ -14,6 +14,7 @@ use url::Url;
 
 use crate::domain::repository::{BrowserPort, ScreenshotFormat};
 use crate::domain::viewport::Viewport;
+use crate::infrastructure::chromiumoxide_helpers::{list_target_ids, new_target, page_for};
 use crate::infrastructure::timeout::within;
 
 pub struct ChromiumoxideAdapter {
@@ -24,7 +25,9 @@ pub struct ChromiumoxideAdapter {
 
 impl std::fmt::Debug for ChromiumoxideAdapter {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("ChromiumoxideAdapter").field("cdp_url", &self.cdp_url).finish()
+        f.debug_struct("ChromiumoxideAdapter")
+            .field("cdp_url", &self.cdp_url)
+            .finish()
     }
 }
 
@@ -41,21 +44,11 @@ impl ChromiumoxideAdapter {
                 }
             }
         });
-        Ok(Self { browser: Arc::new(Mutex::new(browser)), cdp_url, request_timeout })
-    }
-
-    async fn page_for(&self, target: &TargetId) -> Result<chromiumoxide::Page, AppError> {
-        let browser = self.browser.lock().await;
-        let pages = browser
-            .pages()
-            .await
-            .map_err(|e| AppError::BrowserDisconnected(format!("list pages: {e}")))?;
-        for p in pages {
-            if p.target_id().as_ref() == target.0.as_str() {
-                return Ok(p);
-            }
-        }
-        Err(AppError::NotFound(format!("target {} not found", target.0)))
+        Ok(Self {
+            browser: Arc::new(Mutex::new(browser)),
+            cdp_url,
+            request_timeout,
+        })
     }
 }
 
@@ -66,12 +59,7 @@ impl BrowserPort for ChromiumoxideAdapter {
     }
 
     async fn list_targets(&self) -> Result<Vec<TargetId>, AppError> {
-        let browser = self.browser.lock().await;
-        let pages = browser
-            .pages()
-            .await
-            .map_err(|e| AppError::BrowserDisconnected(format!("list pages: {e}")))?;
-        Ok(pages.into_iter().map(|p| TargetId(p.target_id().as_ref().into())).collect())
+        list_target_ids(&self.browser).await
     }
 
     async fn focused_target(&self) -> Result<TargetId, AppError> {
@@ -82,7 +70,7 @@ impl BrowserPort for ChromiumoxideAdapter {
     }
 
     async fn navigate(&self, target: &TargetId, url: &Url) -> Result<(), AppError> {
-        let page = self.page_for(target).await?;
+        let page = page_for(&self.browser, target).await?;
         let url_str = url.as_str().to_string();
         within("navigate", self.request_timeout, async move {
             page.goto(url_str.clone())
@@ -98,31 +86,35 @@ impl BrowserPort for ChromiumoxideAdapter {
         target: &TargetId,
         expression: &str,
     ) -> Result<serde_json::Value, AppError> {
-        let page = self.page_for(target).await?;
+        let page = page_for(&self.browser, target).await?;
         let expr = expression.to_string();
         within("evaluate", self.request_timeout, async move {
             let v = page
                 .evaluate(expr.as_str())
                 .await
                 .map_err(|e| AppError::ActionFailed(format!("evaluate: {e}")))?;
-            Ok(v.into_value::<serde_json::Value>().unwrap_or(serde_json::Value::Null))
+            Ok(v.into_value::<serde_json::Value>()
+                .unwrap_or(serde_json::Value::Null))
         })
         .await
     }
 
     async fn click_at(&self, target: &TargetId, x: i32, y: i32) -> Result<(), AppError> {
-        let page = self.page_for(target).await?;
+        let page = page_for(&self.browser, target).await?;
         within("click_at", self.request_timeout, async move {
-            page.click(chromiumoxide::layout::Point { x: f64::from(x), y: f64::from(y) })
-                .await
-                .map_err(|e| AppError::ActionFailed(format!("click_at: {e}")))?;
+            page.click(chromiumoxide::layout::Point {
+                x: f64::from(x),
+                y: f64::from(y),
+            })
+            .await
+            .map_err(|e| AppError::ActionFailed(format!("click_at: {e}")))?;
             Ok(())
         })
         .await
     }
 
     async fn click_node(&self, target: &TargetId, node: BackendNodeId) -> Result<(), AppError> {
-        let page = self.page_for(target).await?;
+        let page = page_for(&self.browser, target).await?;
         within("click_node", self.request_timeout, async move {
             let js = format!(
                 "(() => {{ const el = document.body && document.querySelectorAll('*')[{}]; if (el) el.click(); }})()",
@@ -137,14 +129,14 @@ impl BrowserPort for ChromiumoxideAdapter {
     }
 
     async fn type_text(&self, target: &TargetId, text: &str) -> Result<(), AppError> {
-        let page = self.page_for(target).await?;
+        let page = page_for(&self.browser, target).await?;
         let text = text.to_string();
         within("type_text", self.request_timeout, async move {
             for ch in text.chars() {
-                page.evaluate(format!(
-                    "document.activeElement && document.activeElement.dispatchEvent(new KeyboardEvent('keydown', {{key: '{}'}}))",
-                    ch
-                ).as_str())
+                let js = format!(
+                    "document.activeElement && document.activeElement.dispatchEvent(new KeyboardEvent('keydown', {{key: '{ch}'}}))"
+                );
+                page.evaluate(js.as_str())
                     .await
                     .map_err(|e| AppError::ActionFailed(format!("type_text: {e}")))?;
             }
@@ -158,7 +150,7 @@ impl BrowserPort for ChromiumoxideAdapter {
         target: &TargetId,
         format: ScreenshotFormat,
     ) -> Result<Vec<u8>, AppError> {
-        let page = self.page_for(target).await?;
+        let page = page_for(&self.browser, target).await?;
         let cdp_format = match format {
             ScreenshotFormat::Png => CaptureScreenshotFormat::Png,
             ScreenshotFormat::Jpeg => CaptureScreenshotFormat::Jpeg,
@@ -181,7 +173,7 @@ impl BrowserPort for ChromiumoxideAdapter {
     }
 
     async fn close_target(&self, target: &TargetId) -> Result<(), AppError> {
-        let page = self.page_for(target).await?;
+        let page = page_for(&self.browser, target).await?;
         page.close()
             .await
             .map_err(|e| AppError::ActionFailed(format!("close_target: {e}")))?;
@@ -189,11 +181,6 @@ impl BrowserPort for ChromiumoxideAdapter {
     }
 
     async fn create_target(&self, url: &Url) -> Result<TargetId, AppError> {
-        let browser = self.browser.lock().await;
-        let page = browser
-            .new_page(url.as_str())
-            .await
-            .map_err(|e| AppError::ActionFailed(format!("new_page: {e}")))?;
-        Ok(TargetId(page.target_id().as_ref().into()))
+        new_target(&self.browser, url).await
     }
 }

@@ -10,9 +10,17 @@ use crate::domain::session::{BrowserSession, SessionState};
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(tag = "kind", rename_all = "snake_case")]
 pub enum SessionMode {
-    Attach { cdp_url: Url },
-    Launch { binary: PathBuf, port: Option<u16> },
-    Cloud { api_key: String, region: Option<String> },
+    Attach {
+        cdp_url: Url,
+    },
+    Launch {
+        binary: PathBuf,
+        port: Option<u16>,
+    },
+    Cloud {
+        api_key: String,
+        region: Option<String>,
+    },
 }
 
 #[async_trait]

@@ -49,6 +49,8 @@ impl UrlShortener {
     }
 
     fn lookup_existing(&self, original: &str) -> Option<String> {
-        self.map.iter().find_map(|(k, v)| (v == original).then(|| k.clone()))
+        self.map
+            .iter()
+            .find_map(|(k, v)| (v == original).then(|| k.clone()))
     }
 }

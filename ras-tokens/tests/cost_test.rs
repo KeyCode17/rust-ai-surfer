@@ -21,7 +21,12 @@ async fn records_usage_and_aggregates() {
     let svc = InMemoryTokenCost::new();
     svc.record(
         "claude-sonnet-4-5",
-        Usage { input_tokens: 1000, output_tokens: 500, cache_read_input_tokens: 0, cache_creation_input_tokens: 0 },
+        Usage {
+            input_tokens: 1000,
+            output_tokens: 500,
+            cache_read_input_tokens: 0,
+            cache_creation_input_tokens: 0,
+        },
     )
     .await
     .expect("record");
@@ -37,7 +42,12 @@ async fn unknown_model_record_is_zero_cost_but_tracked() {
     let svc = InMemoryTokenCost::new();
     svc.record(
         "unknown-model",
-        Usage { input_tokens: 1, output_tokens: 1, cache_read_input_tokens: 0, cache_creation_input_tokens: 0 },
+        Usage {
+            input_tokens: 1,
+            output_tokens: 1,
+            cache_read_input_tokens: 0,
+            cache_creation_input_tokens: 0,
+        },
     )
     .await
     .expect("record");

@@ -24,7 +24,14 @@ impl std::fmt::Debug for ChatAnthropic {
         f.debug_struct("ChatAnthropic")
             .field("model", &self.model)
             .field("base_url", &self.base_url)
-            .field("auth_kind", &self.auth_token.as_ref().map(|_| "bearer").unwrap_or("api_key"))
+            .field(
+                "auth_kind",
+                &self
+                    .auth_token
+                    .as_ref()
+                    .map(|_| "bearer")
+                    .unwrap_or("api_key"),
+            )
             .finish()
     }
 }

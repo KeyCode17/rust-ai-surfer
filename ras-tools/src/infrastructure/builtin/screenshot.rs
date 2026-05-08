@@ -29,19 +29,22 @@ impl ToolHandler for ScreenshotAction {
         ctx: ToolContext,
     ) -> Result<ActionResult, AppError> {
         let target = ctx.browser.focused_target().await?;
-        let bytes = ctx.browser.screenshot(&target, ScreenshotFormat::Png).await?;
+        let bytes = ctx
+            .browser
+            .screenshot(&target, ScreenshotFormat::Png)
+            .await?;
         let b64 = base64_encode(&bytes);
         Ok(ActionResult::ok("captured screenshot").with_image(b64))
     }
 }
 
 fn base64_encode(bytes: &[u8]) -> String {
-    const CHARS: &[u8; 64] =
-        b"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+    const CHARS: &[u8; 64] = b"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
     let mut out = String::with_capacity((bytes.len() + 2) / 3 * 4);
     let mut i = 0;
     while i + 3 <= bytes.len() {
-        let n = (u32::from(bytes[i]) << 16) | (u32::from(bytes[i + 1]) << 8) | u32::from(bytes[i + 2]);
+        let n =
+            (u32::from(bytes[i]) << 16) | (u32::from(bytes[i + 1]) << 8) | u32::from(bytes[i + 2]);
         out.push(CHARS[((n >> 18) & 0x3f) as usize] as char);
         out.push(CHARS[((n >> 12) & 0x3f) as usize] as char);
         out.push(CHARS[((n >> 6) & 0x3f) as usize] as char);

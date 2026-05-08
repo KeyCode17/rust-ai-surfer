@@ -35,6 +35,9 @@ impl Watchdog for CrashWatchdog {
                 }
             }
         });
-        Ok(WatchdogHandle { name: "crash", cancel })
+        Ok(WatchdogHandle {
+            name: "crash",
+            cancel,
+        })
     }
 }

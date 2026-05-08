@@ -50,14 +50,22 @@ async fn main() -> ExitCode {
 
 async fn dispatch(cli: Cli) -> Result<()> {
     match cli.command {
-        Cmd::Run { task, model, cdp_url, cosmium_binary, max_steps } => {
+        Cmd::Run {
+            task,
+            model,
+            cdp_url,
+            cosmium_binary,
+            max_steps,
+        } => {
             tracing::info!(%task, %model, ?cdp_url, ?cosmium_binary, max_steps, "run requested");
             tracing::info!("Run subcommand wires LLM + Browser session in Phase 11 (PoC example).");
             Ok(())
         }
         Cmd::Doctor => doctor().await,
         Cmd::Login => {
-            tracing::info!("Run `claude` to log in via Claude Code OAuth, then unset ANTHROPIC_API_KEY.");
+            tracing::info!(
+                "Run `claude` to log in via Claude Code OAuth, then unset ANTHROPIC_API_KEY."
+            );
             Ok(())
         }
         Cmd::Version => {
@@ -74,11 +82,18 @@ async fn doctor() -> Result<()> {
         .await
         .map(|o| o.status.success())
         .unwrap_or(false);
-    println!("claude CLI:        {}", if claude_ok { "ok" } else { "missing" });
+    println!(
+        "claude CLI:        {}",
+        if claude_ok { "ok" } else { "missing" }
+    );
     let api_key = std::env::var("ANTHROPIC_API_KEY").is_ok();
     println!(
         "ANTHROPIC_API_KEY: {}",
-        if api_key { "set (would shadow OAuth)" } else { "unset (OAuth path enabled)" }
+        if api_key {
+            "set (would shadow OAuth)"
+        } else {
+            "unset (OAuth path enabled)"
+        }
     );
     let creds_path = std::env::var_os("HOME")
         .map(PathBuf::from)

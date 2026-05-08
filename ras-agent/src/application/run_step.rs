@@ -22,7 +22,10 @@ pub struct RunStep {
 impl RunStep {
     #[must_use]
     pub fn new(primary: Arc<dyn LlmClient>, fallback: Option<Arc<dyn LlmClient>>) -> Self {
-        Self { primary_llm: primary, fallback_llm: fallback }
+        Self {
+            primary_llm: primary,
+            fallback_llm: fallback,
+        }
     }
 
     pub async fn execute(
@@ -67,7 +70,11 @@ impl RunStep {
         messages: Vec<ChatMessage>,
     ) -> Result<ChatResponse, AppError> {
         let opts = InvokeOptions::default();
-        match self.primary_llm.ainvoke(messages.clone(), opts.clone()).await {
+        match self
+            .primary_llm
+            .ainvoke(messages.clone(), opts.clone())
+            .await
+        {
             Ok(r) => Ok(r),
             Err(e) if should_switch_to_fallback(&e) => match &self.fallback_llm {
                 Some(fb) => fb.ainvoke(messages, opts).await,

@@ -18,7 +18,10 @@ fn inject_into_existing_system_message_prepends_billing() {
     let v = CcVersion::new("2.1.133").expect("semver");
     let billing = BillingHeader::for_cli(&v);
     let messages = vec![
-        ChatMessage::System(SystemMessage { content: "you are helpful".into(), cache: false }),
+        ChatMessage::System(SystemMessage {
+            content: "you are helpful".into(),
+            cache: false,
+        }),
         ChatMessage::user_text("hi"),
     ];
     let out = inject_billing_header(messages, &billing);

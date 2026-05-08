@@ -55,7 +55,8 @@ impl Config {
             extensions_dir,
             profiles_dir,
             anthropic_api_key: env::var("ANTHROPIC_API_KEY").ok(),
-            claude_code_oauth_enabled: env::var("RAS_CLAUDE_CODE_OAUTH").ok().as_deref() != Some("0"),
+            claude_code_oauth_enabled: env::var("RAS_CLAUDE_CODE_OAUTH").ok().as_deref()
+                != Some("0"),
             cdp_timeout: parse_duration("RAS_CDP_TIMEOUT_S", 60)?,
             action_timeout: parse_duration("RAS_ACTION_TIMEOUT_S", 180)?,
             anonymized_telemetry: env::var("RAS_ANONYMIZED_TELEMETRY").ok().as_deref() != Some("0"),

@@ -25,8 +25,14 @@ fn node(class: &str, ax: Option<&str>) -> EnhancedDomTreeNode {
 
 #[test]
 fn hash_stable_across_dynamic_class_swap() {
-    let a = stable_hash(&node("primary is-active css-12ab34", Some("Submit")), "/html/body");
-    let b = stable_hash(&node("primary hover sc-abcd1234", Some("Submit")), "/html/body");
+    let a = stable_hash(
+        &node("primary is-active css-12ab34", Some("Submit")),
+        "/html/body",
+    );
+    let b = stable_hash(
+        &node("primary hover sc-abcd1234", Some("Submit")),
+        "/html/body",
+    );
     assert_eq!(a, b);
 }
 

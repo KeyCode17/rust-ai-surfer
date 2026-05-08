@@ -14,7 +14,10 @@ pub fn render_plan(plan: &[PlanItem], current: Option<u32>) -> String {
         } else {
             "[ ]"
         };
-        out.push_str(&format!("  {marker} {} - {}\n", item.step, item.description));
+        out.push_str(&format!(
+            "  {marker} {} - {}\n",
+            item.step, item.description
+        ));
     }
     out
 }

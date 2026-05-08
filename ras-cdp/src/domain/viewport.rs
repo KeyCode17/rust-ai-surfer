@@ -10,6 +10,11 @@ pub struct Viewport {
 
 impl Default for Viewport {
     fn default() -> Self {
-        Self { width: 1280, height: 720, device_scale_factor: 1.0, is_mobile: false }
+        Self {
+            width: 1280,
+            height: 720,
+            device_scale_factor: 1.0,
+            is_mobile: false,
+        }
     }
 }

@@ -6,7 +6,11 @@ fn default_profile_emits_expected_flags() {
     assert!(flags.iter().any(|f| f.starts_with("--cosmium-platform=")));
     assert!(flags.iter().any(|f| f.starts_with("--cosmium-language=")));
     assert!(flags.iter().any(|f| f.starts_with("--cosmium-screen=")));
-    assert!(flags.iter().any(|f| f.starts_with("--cosmium-device-memory=")));
+    assert!(
+        flags
+            .iter()
+            .any(|f| f.starts_with("--cosmium-device-memory="))
+    );
 }
 
 #[test]

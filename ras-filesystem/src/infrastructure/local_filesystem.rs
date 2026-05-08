@@ -34,7 +34,11 @@ impl FileSystemPort for LocalFileSystem {
         let bytes = tokio::fs::read(&path)
             .await
             .map_err(|e| AppError::NotFound(format!("read {name}: {e}")))?;
-        Ok(FileSystemFile { name: name.into(), extension: ext, bytes })
+        Ok(FileSystemFile {
+            name: name.into(),
+            extension: ext,
+            bytes,
+        })
     }
 
     async fn write(&self, file: FileSystemFile) -> Result<(), AppError> {
@@ -78,12 +82,19 @@ impl FileSystemPort for LocalFileSystem {
                 .metadata()
                 .await
                 .map_err(|e| AppError::InternalError(format!("metadata: {e}")))?;
-            out.push(FileSummary { name, extension: ext, size_bytes: meta.len() });
+            out.push(FileSummary {
+                name,
+                extension: ext,
+                size_bytes: meta.len(),
+            });
         }
         Ok(out)
     }
 
     async fn snapshot(&self) -> Result<FileSystemState, AppError> {
-        Ok(FileSystemState { root: self.root.clone(), files: self.list().await? })
+        Ok(FileSystemState {
+            root: self.root.clone(),
+            files: self.list().await?,
+        })
     }
 }

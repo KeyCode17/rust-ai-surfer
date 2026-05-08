@@ -25,7 +25,9 @@ impl FileExtension {
             "docx" => Ok(Self::Docx),
             "pdf" => Ok(Self::Pdf),
             "txt" => Ok(Self::Txt),
-            other => Err(AppError::BadRequest(format!("unsupported extension: {other}"))),
+            other => Err(AppError::BadRequest(format!(
+                "unsupported extension: {other}"
+            ))),
         }
     }
 

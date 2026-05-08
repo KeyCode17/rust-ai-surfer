@@ -21,7 +21,12 @@ impl ResolveOauthCredentials {
         cred_file_repo: Arc<dyn CredentialsFileRepository>,
         settings_repo: Arc<dyn SettingsFileRepository>,
     ) -> Self {
-        Self { env_repo, keychain_repo, cred_file_repo, settings_repo }
+        Self {
+            env_repo,
+            keychain_repo,
+            cred_file_repo,
+            settings_repo,
+        }
     }
 
     pub async fn execute(&self) -> Result<ClaudeCodeCredentials, AppError> {

@@ -39,5 +39,9 @@ fn domain_modules_do_not_import_third_party_sdks() {
             }
         }
     }
-    assert!(violations.is_empty(), "layer violations:\n{}", violations.join("\n"));
+    assert!(
+        violations.is_empty(),
+        "layer violations:\n{}",
+        violations.join("\n")
+    );
 }

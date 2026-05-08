@@ -16,7 +16,10 @@ impl BroadcastBus {
     pub fn new(capacity: usize) -> Self {
         let (mut tx, rx) = broadcast::<BrowserEvent>(capacity);
         tx.set_overflow(true);
-        Self { tx: Mutex::new(tx), rx }
+        Self {
+            tx: Mutex::new(tx),
+            rx,
+        }
     }
 }
 

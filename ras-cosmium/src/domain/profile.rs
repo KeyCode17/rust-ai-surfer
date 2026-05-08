@@ -68,14 +68,26 @@ impl CosmiumProfile {
     #[must_use]
     pub fn to_cli_flags(&self) -> Vec<String> {
         let mut out = Vec::new();
-        out.push(format!("--cosmium-platform={}", platform_str(self.identity.platform)));
+        out.push(format!(
+            "--cosmium-platform={}",
+            platform_str(self.identity.platform)
+        ));
         out.push(format!("--cosmium-vendor={}", self.identity.vendor));
         out.push(format!("--cosmium-product={}", self.identity.product));
         out.push(format!("--cosmium-language={}", self.locale.language));
         out.push(format!("--cosmium-timezone={}", self.locale.timezone));
-        out.push(format!("--cosmium-accept-language={}", self.locale.accept_language));
-        out.push(format!("--cosmium-device-memory={}", self.hardware.device_memory_gb));
-        out.push(format!("--cosmium-hardware-concurrency={}", self.hardware.hardware_concurrency));
+        out.push(format!(
+            "--cosmium-accept-language={}",
+            self.locale.accept_language
+        ));
+        out.push(format!(
+            "--cosmium-device-memory={}",
+            self.hardware.device_memory_gb
+        ));
+        out.push(format!(
+            "--cosmium-hardware-concurrency={}",
+            self.hardware.hardware_concurrency
+        ));
         out.push(format!(
             "--cosmium-screen={}x{}x{}",
             self.hardware.screen_width, self.hardware.screen_height, self.hardware.color_depth,

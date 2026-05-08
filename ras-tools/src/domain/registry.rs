@@ -19,7 +19,9 @@ pub struct ToolContext {
 
 impl std::fmt::Debug for ToolContext {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("ToolContext").field("page_url", &self.page_url).finish()
+        f.debug_struct("ToolContext")
+            .field("page_url", &self.page_url)
+            .finish()
     }
 }
 
@@ -38,9 +40,13 @@ impl ActionRegistry {
         let metadata = handler.metadata();
         let name = metadata.name.clone();
         if self.actions.contains_key(&name) {
-            return Err(AppError::Conflict(format!("action already registered: {}", name.0)));
+            return Err(AppError::Conflict(format!(
+                "action already registered: {}",
+                name.0
+            )));
         }
-        self.actions.insert(name, RegisteredAction { metadata, handler });
+        self.actions
+            .insert(name, RegisteredAction { metadata, handler });
         Ok(())
     }
 

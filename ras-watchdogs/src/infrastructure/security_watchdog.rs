@@ -5,7 +5,6 @@ use ras_browser::AllowedDomains;
 use ras_errors::AppError;
 use ras_events::BrowserEvent;
 use ras_types::DomainPattern;
-use tokio_util::sync::CancellationToken;
 use tracing::warn;
 use url::Url;
 
@@ -62,7 +61,11 @@ impl Watchdog for SecurityWatchdog {
         let allowed = self.allowed.clone();
         let prohibited = self.prohibited.clone();
         let block_ip = self.block_ip_addresses;
-        let inner = SecurityWatchdog { allowed, prohibited, block_ip_addresses: block_ip };
+        let inner = SecurityWatchdog {
+            allowed,
+            prohibited,
+            block_ip_addresses: block_ip,
+        };
         let task_cancel = cancel.clone();
         tokio::spawn(async move {
             loop {
@@ -80,6 +83,9 @@ impl Watchdog for SecurityWatchdog {
                 }
             }
         });
-        Ok(WatchdogHandle { name: "security", cancel })
+        Ok(WatchdogHandle {
+            name: "security",
+            cancel,
+        })
     }
 }

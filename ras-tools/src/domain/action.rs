@@ -35,6 +35,8 @@ pub struct RegisteredAction {
 
 impl std::fmt::Debug for RegisteredAction {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("RegisteredAction").field("metadata", &self.metadata).finish()
+        f.debug_struct("RegisteredAction")
+            .field("metadata", &self.metadata)
+            .finish()
     }
 }

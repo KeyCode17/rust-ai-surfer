@@ -13,8 +13,8 @@ where
     T: Validate + DeserializeOwned,
 {
     pub fn from_json(value: serde_json::Value) -> Result<Self, AppError> {
-        let inner: T = serde_json::from_value(value)
-            .map_err(|e| AppError::ValidationError(e.to_string()))?;
+        let inner: T =
+            serde_json::from_value(value).map_err(|e| AppError::ValidationError(e.to_string()))?;
         inner
             .validate()
             .map_err(|e| AppError::ValidationError(e.to_string()))?;

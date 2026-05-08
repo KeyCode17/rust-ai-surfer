@@ -73,7 +73,11 @@ impl ChatAnthropicClaudeCode {
                 .map_err(|e| AppError::InternalError(format!("http client: {e}")))?,
         };
         inner.api_key = None;
-        Ok(Self { inner, cc_version, billing })
+        Ok(Self {
+            inner,
+            cc_version,
+            billing,
+        })
     }
 
     #[must_use]

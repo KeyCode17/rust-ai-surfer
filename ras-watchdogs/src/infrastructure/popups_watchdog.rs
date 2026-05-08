@@ -32,6 +32,9 @@ impl Watchdog for PopupsWatchdog {
                 }
             }
         });
-        Ok(WatchdogHandle { name: "popups", cancel })
+        Ok(WatchdogHandle {
+            name: "popups",
+            cancel,
+        })
     }
 }

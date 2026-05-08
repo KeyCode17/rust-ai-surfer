@@ -13,15 +13,7 @@ const DYNAMIC_PREFIXES: &[&str] = &[
 ];
 
 const DYNAMIC_KEYWORDS: &[&str] = &[
-    "active",
-    "hover",
-    "focus",
-    "selected",
-    "open",
-    "expanded",
-    "current",
-    "loading",
-    "pending",
+    "active", "hover", "focus", "selected", "open", "expanded", "current", "loading", "pending",
 ];
 
 #[must_use]

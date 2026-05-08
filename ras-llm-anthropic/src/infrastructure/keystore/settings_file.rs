@@ -33,8 +33,12 @@ impl SettingsFileReader {
 
     #[must_use]
     pub fn default_path() -> Self {
-        let home = std::env::var_os("HOME").map(PathBuf::from).unwrap_or_else(|| PathBuf::from("/"));
-        Self { path: home.join(".claude").join("settings.json") }
+        let home = std::env::var_os("HOME")
+            .map(PathBuf::from)
+            .unwrap_or_else(|| PathBuf::from("/"));
+        Self {
+            path: home.join(".claude").join("settings.json"),
+        }
     }
 }
 

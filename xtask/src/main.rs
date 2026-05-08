@@ -36,7 +36,11 @@ enum BumpKind {
 
 fn main() -> Result<()> {
     match Cli::parse().cmd {
-        Cmd::Bump { kind, phase, skip_gate } => bump(kind, phase, skip_gate),
+        Cmd::Bump {
+            kind,
+            phase,
+            skip_gate,
+        } => bump(kind, phase, skip_gate),
         Cmd::CheckLoc { max } => check_loc(max),
     }
 }
@@ -72,16 +76,25 @@ fn bump(kind: BumpKind, phase: Option<String>, skip_gate: bool) -> Result<()> {
 
 fn check_loc(max: usize) -> Result<()> {
     let mut fail = 0usize;
-    for entry in walkdir::WalkDir::new(".").into_iter().filter_map(Result::ok) {
+    for entry in walkdir::WalkDir::new(".")
+        .into_iter()
+        .filter_map(Result::ok)
+    {
         let p = entry.path();
         if !p.extension().is_some_and(|e| e == "rs") {
             continue;
         }
         let s = p.to_string_lossy();
-        if s.contains("/target/") || s.contains("/tests/") || s.contains("/examples/") || s.contains("/xtask/") {
+        if s.contains("/target/")
+            || s.contains("/tests/")
+            || s.contains("/examples/")
+            || s.contains("/xtask/")
+        {
             continue;
         }
-        let lines = fs::read_to_string(p).map(|s| s.lines().count()).unwrap_or(0);
+        let lines = fs::read_to_string(p)
+            .map(|s| s.lines().count())
+            .unwrap_or(0);
         if lines > max {
             eprintln!("X {} : {lines} LOC (max {max})", p.display());
             fail += 1;
@@ -94,7 +107,10 @@ fn check_loc(max: usize) -> Result<()> {
 }
 
 fn run(cmd: &str, args: &[&str]) -> Result<()> {
-    let status = Command::new(cmd).args(args).status().with_context(|| format!("spawn {cmd}"))?;
+    let status = Command::new(cmd)
+        .args(args)
+        .status()
+        .with_context(|| format!("spawn {cmd}"))?;
     if !status.success() {
         bail!("{cmd} {args:?} failed: {status}");
     }
@@ -111,9 +127,21 @@ struct Version {
 impl Version {
     fn bump(self, kind: BumpKind) -> Self {
         match kind {
-            BumpKind::Major => Self { x: self.x + 1, y: 0, z: 0 },
-            BumpKind::Minor => Self { x: self.x, y: self.y + 1, z: 0 },
-            BumpKind::Patch => Self { x: self.x, y: self.y, z: self.z + 1 },
+            BumpKind::Major => Self {
+                x: self.x + 1,
+                y: 0,
+                z: 0,
+            },
+            BumpKind::Minor => Self {
+                x: self.x,
+                y: self.y + 1,
+                z: 0,
+            },
+            BumpKind::Patch => Self {
+                x: self.x,
+                y: self.y,
+                z: self.z + 1,
+            },
         }
     }
 }
@@ -129,10 +157,22 @@ fn parse_workspace_version(manifest: &str) -> Result<Version> {
         .lines()
         .find(|l| l.trim_start().starts_with("version") && l.contains('"'))
         .ok_or_else(|| anyhow!("no version line in [workspace.package]"))?;
-    let between = line.split('"').nth(1).ok_or_else(|| anyhow!("malformed version line"))?;
+    let between = line
+        .split('"')
+        .nth(1)
+        .ok_or_else(|| anyhow!("malformed version line"))?;
     let mut parts = between.split('.');
-    let x: u32 = parts.next().ok_or_else(|| anyhow!("missing major"))?.parse()?;
-    let y: u32 = parts.next().ok_or_else(|| anyhow!("missing minor"))?.parse()?;
-    let z: u32 = parts.next().ok_or_else(|| anyhow!("missing patch"))?.parse()?;
+    let x: u32 = parts
+        .next()
+        .ok_or_else(|| anyhow!("missing major"))?
+        .parse()?;
+    let y: u32 = parts
+        .next()
+        .ok_or_else(|| anyhow!("missing minor"))?
+        .parse()?;
+    let z: u32 = parts
+        .next()
+        .ok_or_else(|| anyhow!("missing patch"))?
+        .parse()?;
     Ok(Version { x, y, z })
 }

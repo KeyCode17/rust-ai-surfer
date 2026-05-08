@@ -39,7 +39,12 @@ impl ClaudeCodeCredentials {
         expires_at_ms: i64,
         source: CredentialSource,
     ) -> Self {
-        Self { access_token: access_token.into(), expires_at_ms, source, base_url: None }
+        Self {
+            access_token: access_token.into(),
+            expires_at_ms,
+            source,
+            base_url: None,
+        }
     }
 
     #[must_use]

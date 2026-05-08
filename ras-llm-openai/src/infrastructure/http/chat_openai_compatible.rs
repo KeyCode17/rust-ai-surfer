@@ -77,7 +77,10 @@ impl LlmClient for ChatOpenAICompatible {
             temperature: options.temperature,
             stop: options.stop_sequences,
         };
-        let url = format!("{}/v1/chat/completions", self.base_url.trim_end_matches('/'));
+        let url = format!(
+            "{}/v1/chat/completions",
+            self.base_url.trim_end_matches('/')
+        );
         let mut headers = HeaderMap::new();
         match &self.auth {
             OpenAiAuth::Bearer(token) => {
@@ -86,13 +89,19 @@ impl LlmClient for ChatOpenAICompatible {
                 }
             }
             OpenAiAuth::Header(name, value) => {
-                if let (Ok(n), Ok(v)) = (HeaderName::from_bytes(name.as_bytes()), HeaderValue::from_str(value)) {
+                if let (Ok(n), Ok(v)) = (
+                    HeaderName::from_bytes(name.as_bytes()),
+                    HeaderValue::from_str(value),
+                ) {
                     headers.insert(n, v);
                 }
             }
         }
         for (k, v) in &self.extra_headers {
-            if let (Ok(n), Ok(val)) = (HeaderName::from_bytes(k.as_bytes()), HeaderValue::from_str(v)) {
+            if let (Ok(n), Ok(val)) = (
+                HeaderName::from_bytes(k.as_bytes()),
+                HeaderValue::from_str(v),
+            ) {
                 headers.insert(n, val);
             }
         }

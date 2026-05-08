@@ -35,7 +35,12 @@ pub struct ActionLoopDetector {
 impl ActionLoopDetector {
     #[must_use]
     pub fn new() -> Self {
-        Self { history: Vec::new(), pages: Vec::new(), action_threshold: 5, stagnation_threshold: 5 }
+        Self {
+            history: Vec::new(),
+            pages: Vec::new(),
+            action_threshold: 5,
+            stagnation_threshold: 5,
+        }
     }
 
     pub fn record_action(&mut self, action_hash: impl Into<String>) {

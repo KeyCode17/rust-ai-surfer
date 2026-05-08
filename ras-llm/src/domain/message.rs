@@ -58,7 +58,10 @@ pub struct ToolCall {
 impl ChatMessage {
     #[must_use]
     pub fn system(content: impl Into<String>) -> Self {
-        Self::System(SystemMessage { content: content.into(), cache: false })
+        Self::System(SystemMessage {
+            content: content.into(),
+            cache: false,
+        })
     }
 
     #[must_use]

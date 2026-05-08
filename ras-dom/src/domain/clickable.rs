@@ -26,7 +26,12 @@ pub struct PaintOrderRect {
 impl PaintOrderRect {
     #[must_use]
     pub fn from_bbox(b: BoundingBox) -> Self {
-        Self { x1: b.x, y1: b.y, x2: b.x + b.width, y2: b.y + b.height }
+        Self {
+            x1: b.x,
+            y1: b.y,
+            x2: b.x + b.width,
+            y2: b.y + b.height,
+        }
     }
 
     #[must_use]

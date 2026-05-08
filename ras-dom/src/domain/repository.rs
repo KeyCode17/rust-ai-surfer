@@ -14,7 +14,11 @@ pub struct HighlightOptions {
 
 impl Default for HighlightOptions {
     fn default() -> Self {
-        Self { draw_bounding_boxes: true, include_text_labels: true, max_index: 200 }
+        Self {
+            draw_bounding_boxes: true,
+            include_text_labels: true,
+            max_index: 200,
+        }
     }
 }
 

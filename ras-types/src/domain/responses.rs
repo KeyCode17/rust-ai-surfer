@@ -8,7 +8,10 @@ pub struct SingleResponse<T> {
 
 impl<T> SingleResponse<T> {
     pub fn new(data: T, message: impl Into<String>) -> Self {
-        Self { data, message: message.into() }
+        Self {
+            data,
+            message: message.into(),
+        }
     }
 }
 

@@ -52,7 +52,11 @@ impl BrowserLauncher for CosmiumProcessLauncher {
         self.children.lock().await.push(child);
         let cdp_url = wait_for_cdp(port).await?;
         info!(%cdp_url, ?pid, "cosmium ready");
-        Ok(LaunchedBrowser { cdp_url, user_data_dir, pid })
+        Ok(LaunchedBrowser {
+            cdp_url,
+            user_data_dir,
+            pid,
+        })
     }
 
     async fn shutdown(&self, browser: &LaunchedBrowser) -> Result<(), AppError> {
@@ -107,5 +111,7 @@ async fn wait_for_cdp(port: u16) -> Result<Url, AppError> {
         }
         sleep(Duration::from_millis(250)).await;
     }
-    Err(AppError::BrowserDisconnected(format!("cdp not ready on port {port}")))
+    Err(AppError::BrowserDisconnected(format!(
+        "cdp not ready on port {port}"
+    )))
 }

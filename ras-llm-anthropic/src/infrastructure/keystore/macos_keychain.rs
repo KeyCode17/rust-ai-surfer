@@ -29,7 +29,12 @@ impl KeychainRepository for MacosKeychain {
             return Ok(None);
         }
         let output = match tokio::process::Command::new("security")
-            .args(["find-generic-password", "-s", "Claude Code-credentials", "-w"])
+            .args([
+                "find-generic-password",
+                "-s",
+                "Claude Code-credentials",
+                "-w",
+            ])
             .output()
             .await
         {
@@ -54,6 +59,10 @@ impl KeychainRepository for MacosKeychain {
             return Ok(None);
         };
         let expires_at = blob.expires_at.unwrap_or(0);
-        Ok(Some(ClaudeCodeCredentials::new(token, expires_at, CredentialSource::Keychain)))
+        Ok(Some(ClaudeCodeCredentials::new(
+            token,
+            expires_at,
+            CredentialSource::Keychain,
+        )))
     }
 }

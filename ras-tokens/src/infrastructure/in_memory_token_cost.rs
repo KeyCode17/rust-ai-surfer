@@ -22,7 +22,10 @@ impl InMemoryTokenCost {
     #[must_use]
     pub fn with_pricing(pricing: Vec<ModelPricing>) -> Self {
         let map = pricing.into_iter().map(|p| (p.model.clone(), p)).collect();
-        Self { pricing: map, usage: RwLock::new(HashMap::new()) }
+        Self {
+            pricing: map,
+            usage: RwLock::new(HashMap::new()),
+        }
     }
 }
 
@@ -34,7 +37,9 @@ impl Default for InMemoryTokenCost {
 
 impl std::fmt::Debug for InMemoryTokenCost {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("InMemoryTokenCost").field("models", &self.pricing.len()).finish()
+        f.debug_struct("InMemoryTokenCost")
+            .field("models", &self.pricing.len())
+            .finish()
     }
 }
 
@@ -56,10 +61,12 @@ impl TokenCostService for InMemoryTokenCost {
             usage.cache_creation_input_tokens,
         );
         let mut map = self.usage.write().await;
-        let stats = map.entry(model.to_string()).or_insert_with(|| ModelUsageStats {
-            model: model.to_string(),
-            ..Default::default()
-        });
+        let stats = map
+            .entry(model.to_string())
+            .or_insert_with(|| ModelUsageStats {
+                model: model.to_string(),
+                ..Default::default()
+            });
         stats.input_tokens += u64::from(usage.input_tokens);
         stats.output_tokens += u64::from(usage.output_tokens);
         stats.cache_read_tokens += u64::from(usage.cache_read_input_tokens);

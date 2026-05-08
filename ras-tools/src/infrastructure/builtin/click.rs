@@ -40,7 +40,9 @@ impl ToolHandler for ClickElementAction {
         let p: IndexParams = serde_json::from_value(params)
             .map_err(|e| AppError::ValidationError(format!("click params: {e}")))?;
         let target = ctx.browser.focused_target().await?;
-        ctx.browser.click_node(&target, BackendNodeId(p.index)).await?;
+        ctx.browser
+            .click_node(&target, BackendNodeId(p.index))
+            .await?;
         Ok(ActionResult::ok(format!("clicked element {}", p.index)))
     }
 }

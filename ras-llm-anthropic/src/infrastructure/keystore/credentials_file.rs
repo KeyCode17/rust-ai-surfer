@@ -33,8 +33,12 @@ impl CredentialsFileReader {
 
     #[must_use]
     pub fn default_path() -> Self {
-        let home = std::env::var_os("HOME").map(PathBuf::from).unwrap_or_else(|| PathBuf::from("/"));
-        Self { path: home.join(".claude").join(".credentials.json") }
+        let home = std::env::var_os("HOME")
+            .map(PathBuf::from)
+            .unwrap_or_else(|| PathBuf::from("/"));
+        Self {
+            path: home.join(".claude").join(".credentials.json"),
+        }
     }
 }
 
@@ -58,6 +62,10 @@ impl CredentialsFileRepository for CredentialsFileReader {
             return Ok(None);
         };
         let expires_at = blob.expires_at.unwrap_or(0);
-        Ok(Some(ClaudeCodeCredentials::new(token, expires_at, CredentialSource::CredentialsFile)))
+        Ok(Some(ClaudeCodeCredentials::new(
+            token,
+            expires_at,
+            CredentialSource::CredentialsFile,
+        )))
     }
 }

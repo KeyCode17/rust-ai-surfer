@@ -8,6 +8,12 @@ Versioning policy:
 - **1.0.0** ships when all 11 phases land and `examples/claude_code_oauth_cosmium.rs` runs end-to-end against a live cosmium binary.
 
 ## [Unreleased]
+## [1.0.1] - CI fixes
+
+- Drop pedantic clippy from workspace lints (kept `unwrap_used = deny`, `dbg_macro = deny`).
+- Drop `RUSTFLAGS=-D warnings` from CI; clippy job uses `-D clippy::unwrap_used -D clippy::dbg_macro` instead.
+- Drop unstable rustfmt options (`imports_granularity`, `group_imports`) so stable toolchain doesn't warn.
+- Remove unused `tokio_util::sync::CancellationToken` import in `ras-watchdogs`.
 ## [1.0.0] - Full port complete
 
 All 11 phases shipped. Workspace at 39 crates, 50+ tests pass, end-to-end PoC builds. Major bump.

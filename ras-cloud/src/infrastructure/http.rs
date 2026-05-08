@@ -18,13 +18,19 @@ impl HttpCloudClient {
         let client = Client::builder()
             .build()
             .map_err(|e| AppError::InternalError(format!("http: {e}")))?;
-        Ok(Self { base_url, api_key, client })
+        Ok(Self {
+            base_url,
+            api_key,
+            client,
+        })
     }
 }
 
 impl std::fmt::Debug for HttpCloudClient {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("HttpCloudClient").field("base_url", &self.base_url).finish()
+        f.debug_struct("HttpCloudClient")
+            .field("base_url", &self.base_url)
+            .finish()
     }
 }
 
@@ -39,17 +45,18 @@ struct ProvisionResponse {
 #[async_trait]
 impl CloudClient for HttpCloudClient {
     async fn start_device_auth(&self) -> Result<DeviceAuth, AppError> {
-        Err(AppError::NotFound("device auth not provisioned in this build".into()))
+        Err(AppError::NotFound(
+            "device auth not provisioned in this build".into(),
+        ))
     }
 
     async fn poll_token(&self, _device_code: &str) -> Result<String, AppError> {
-        Err(AppError::NotFound("device auth not provisioned in this build".into()))
+        Err(AppError::NotFound(
+            "device auth not provisioned in this build".into(),
+        ))
     }
 
-    async fn provision_browser(
-        &self,
-        region: Option<String>,
-    ) -> Result<CloudSession, AppError> {
+    async fn provision_browser(&self, region: Option<String>) -> Result<CloudSession, AppError> {
         let key = self
             .api_key
             .as_ref()

@@ -41,7 +41,10 @@ impl Watchdog for DownloadsWatchdog {
                 }
             }
         });
-        Ok(WatchdogHandle { name: "downloads", cancel })
+        Ok(WatchdogHandle {
+            name: "downloads",
+            cancel,
+        })
     }
 }
 

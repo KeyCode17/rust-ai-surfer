@@ -3,7 +3,10 @@ use ras_agent::domain::agent_output::ActionInvocation;
 use ras_types::ActionName;
 
 fn invocation(name: &str, params: serde_json::Value) -> ActionInvocation {
-    ActionInvocation { name: ActionName(name.into()), parameters: params }
+    ActionInvocation {
+        name: ActionName(name.into()),
+        parameters: params,
+    }
 }
 
 #[test]
