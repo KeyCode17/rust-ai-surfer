@@ -79,10 +79,12 @@ jobs:
       - name: publish per-crate with rate-limit backoff
         env:
           CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
+        shell: bash
         run: |
-          set -uo pipefail
+          set +e
+          set +o pipefail
           if [ -z "${CARGO_REGISTRY_TOKEN:-}" ]; then
-            echo "::error::CARGO_REGISTRY_TOKEN secret is not set"
+            echo "::error::CARGO_REGISTRY_TOKEN is empty"
             exit 1
           fi
           ORDER=(
@@ -99,21 +101,45 @@ jobs:
             ras-agent
           )
           VERSION=$(grep -m1 '^version' Cargo.toml | sed -E 's/.*"([^"]+)".*/\1/')
+          echo "[info] target version $VERSION"
+          FAILED=()
           for crate in "${ORDER[@]}"; do
-            published=$(cargo search "$crate" --limit 1 2>/dev/null | grep -E "^$crate = " | sed -E 's/.*"([^"]+)".*/\1/')
+            search_out=$(cargo search "$crate" --limit 1 2>/dev/null || true)
+            published=$(echo "$search_out" | grep -E "^$crate = " | sed -E 's/.*"([^"]+)".*/\1/' || true)
             if [ "$published" = "$VERSION" ]; then
               echo "[skip] $crate $VERSION already published"
               continue
             fi
             echo "[publish] $crate -> crates.io as $VERSION"
+            ok=0
             for attempt in 1 2 3 4 5 6; do
-              if cargo publish -p "$crate" --token "$CARGO_REGISTRY_TOKEN"; then
+              out=$(cargo publish -p "$crate" --token "$CARGO_REGISTRY_TOKEN" 2>&1)
+              rc=$?
+              echo "$out"
+              if [ "$rc" -eq 0 ]; then
                 echo "[ok] $crate"
+                ok=1
                 break
               fi
-              wait_seconds=$(( attempt * 90 ))
-              echo "::warning::publish $crate failed; sleeping ${wait_seconds}s (attempt $attempt/6)"
+              if echo "$out" | grep -qE "already exists on crates\.io|already uploaded"; then
+                echo "[ok] $crate (already on crates.io index, skipping)"
+                ok=1
+                break
+              fi
+              if echo "$out" | grep -q "429 Too Many Requests"; then
+                wait_seconds=420
+              else
+                wait_seconds=$(( attempt * 60 ))
+              fi
+              echo "::warning::publish $crate failed (rc=$rc); sleeping ${wait_seconds}s (attempt $attempt/6)"
               sleep "$wait_seconds"
             done
+            if [ "$ok" -eq 0 ]; then
+              FAILED+=("$crate")
+            fi
             sleep 12
           done
+          if [ "${#FAILED[@]}" -gt 0 ]; then
+            echo "::error::${#FAILED[@]} crate(s) failed to publish: ${FAILED[*]}"
+            exit 1
+          fi
