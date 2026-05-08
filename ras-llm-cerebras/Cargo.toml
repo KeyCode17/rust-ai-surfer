@@ -14,7 +14,8 @@ workspace = true
 [dependencies]
 ras-errors  = { workspace = true }
 ras-types   = { workspace = true }
-ras-llm     = { workspace = true }
+ras-llm        = { workspace = true }
+ras-llm-openai = { workspace = true }
 async-trait = { workspace = true }
 reqwest     = { workspace = true }
 serde       = { workspace = true }

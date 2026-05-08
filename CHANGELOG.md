@@ -8,6 +8,11 @@ Versioning policy:
 - **1.0.0** ships when all 11 phases land and `examples/claude_code_oauth_cosmium.rs` runs end-to-end against a live cosmium binary.
 
 ## [Unreleased]
+## [0.8.0] - Phase 7 — LLM providers + token cost
+
+- ras-llm-openai: `ChatOpenAICompatible` + `OpenAiAuth::{Bearer, Header}` covering OpenAI plus all OpenAI-compatible providers (groq, cerebras, deepseek, mistral, openrouter, vercel) via re-exports.
+- ras-tokens: `InMemoryTokenCost` impl with default pricing for claude-sonnet-4-5, claude-haiku-4-5, gpt-4o, gemini-2.0-flash; record/aggregate API tracks per-model usage.
+- 3 token-cost tests pass.
 ## [0.7.0] - Phase 6 — Watchdogs + event bus
 
 - 4 watchdog impls: `SecurityWatchdog` (allowed/prohibited domains + IP block, IPv6 bracket-aware), `PopupsWatchdog`, `CrashWatchdog`, `DownloadsWatchdog`.
