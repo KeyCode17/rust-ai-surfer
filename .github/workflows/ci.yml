@@ -9,6 +9,20 @@ env:
   CARGO_TERM_COLOR: always
 
 jobs:
+  pr-source-branch:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - name: enforce branch flow
+        run: |
+          BASE='${{ github.base_ref }}'
+          HEAD='${{ github.head_ref }}'
+          echo "PR: $HEAD -> $BASE"
+          if [ "$BASE" = "main" ] && [ "$HEAD" != "develop" ]; then
+            echo "::error::PRs to main are only allowed from develop. Got head=$HEAD"
+            exit 1
+          fi
+
   fmt:
     runs-on: ubuntu-latest
     steps:
