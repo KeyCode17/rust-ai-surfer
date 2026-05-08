@@ -51,7 +51,7 @@ exclude         = ["examples", "tests", "docs", "scripts"]
 default-members = ["ras-cli", "ras-daemon"]
 
 [workspace.package]
-version       = "2.0.0"
+version       = "2.1.0"
 edition       = "2024"
 rust-version  = "1.95.0"
 license       = "MIT"
@@ -63,46 +63,46 @@ keywords      = ["browser", "automation", "llm", "agent", "cdp"]
 categories    = ["web-programming", "command-line-utilities"]
 
 [workspace.dependencies]
-ras-errors      = { path = "ras-errors",      version = "2.0.0" }
-ras-types       = { path = "ras-types",       version = "2.0.0" }
-ras-validation  = { path = "ras-validation",  version = "2.0.0" }
-ras-config      = { path = "ras-config",      version = "2.0.0" }
+ras-errors      = { path = "ras-errors",      version = "2.1.0" }
+ras-types       = { path = "ras-types",       version = "2.1.0" }
+ras-validation  = { path = "ras-validation",  version = "2.1.0" }
+ras-config      = { path = "ras-config",      version = "2.1.0" }
 
-ras-events      = { path = "ras-events",      version = "2.0.0" }
-ras-cdp         = { path = "ras-cdp",         version = "2.0.0" }
-ras-cosmium     = { path = "ras-cosmium",     version = "2.0.0" }
+ras-events      = { path = "ras-events",      version = "2.1.0" }
+ras-cdp         = { path = "ras-cdp",         version = "2.1.0" }
+ras-cosmium     = { path = "ras-cosmium",     version = "2.1.0" }
 
-ras-llm             = { path = "ras-llm",             version = "2.0.0" }
-ras-llm-anthropic   = { path = "ras-llm-anthropic",   version = "2.0.0" }
-ras-llm-openai      = { path = "ras-llm-openai",      version = "2.0.0" }
-ras-llm-google      = { path = "ras-llm-google",      version = "2.0.0" }
-ras-llm-groq        = { path = "ras-llm-groq",        version = "2.0.0" }
-ras-llm-bedrock     = { path = "ras-llm-bedrock",     version = "2.0.0" }
-ras-llm-openrouter  = { path = "ras-llm-openrouter",  version = "2.0.0" }
-ras-llm-vercel      = { path = "ras-llm-vercel",      version = "2.0.0" }
-ras-llm-deepseek    = { path = "ras-llm-deepseek",    version = "2.0.0" }
-ras-llm-cerebras    = { path = "ras-llm-cerebras",    version = "2.0.0" }
-ras-llm-mistral     = { path = "ras-llm-mistral",     version = "2.0.0" }
-ras-llm-ollama      = { path = "ras-llm-ollama",      version = "2.0.0" }
-ras-llm-oci         = { path = "ras-llm-oci",         version = "2.0.0" }
-ras-llm-cloud       = { path = "ras-llm-cloud",       version = "2.0.0" }
-ras-llm-langchain   = { path = "ras-llm-langchain",   version = "2.0.0" }
+ras-llm             = { path = "ras-llm",             version = "2.1.0" }
+ras-llm-anthropic   = { path = "ras-llm-anthropic",   version = "2.1.0" }
+ras-llm-openai      = { path = "ras-llm-openai",      version = "2.1.0" }
+ras-llm-google      = { path = "ras-llm-google",      version = "2.1.0" }
+ras-llm-groq        = { path = "ras-llm-groq",        version = "2.1.0" }
+ras-llm-bedrock     = { path = "ras-llm-bedrock",     version = "2.1.0" }
+ras-llm-openrouter  = { path = "ras-llm-openrouter",  version = "2.1.0" }
+ras-llm-vercel      = { path = "ras-llm-vercel",      version = "2.1.0" }
+ras-llm-deepseek    = { path = "ras-llm-deepseek",    version = "2.1.0" }
+ras-llm-cerebras    = { path = "ras-llm-cerebras",    version = "2.1.0" }
+ras-llm-mistral     = { path = "ras-llm-mistral",     version = "2.1.0" }
+ras-llm-ollama      = { path = "ras-llm-ollama",      version = "2.1.0" }
+ras-llm-oci         = { path = "ras-llm-oci",         version = "2.1.0" }
+ras-llm-cloud       = { path = "ras-llm-cloud",       version = "2.1.0" }
+ras-llm-langchain   = { path = "ras-llm-langchain",   version = "2.1.0" }
 
-ras-browser     = { path = "ras-browser",     version = "2.0.0" }
-ras-dom         = { path = "ras-dom",         version = "2.0.0" }
-ras-tools       = { path = "ras-tools",       version = "2.0.0" }
-ras-watchdogs   = { path = "ras-watchdogs",   version = "2.0.0" }
-ras-filesystem  = { path = "ras-filesystem",  version = "2.0.0" }
-ras-tokens      = { path = "ras-tokens",      version = "2.0.0" }
-ras-judge       = { path = "ras-judge",       version = "2.0.0" }
-ras-telemetry   = { path = "ras-telemetry",   version = "2.0.0" }
-ras-recording   = { path = "ras-recording",   version = "2.0.0" }
-ras-sandbox     = { path = "ras-sandbox",     version = "2.0.0" }
-ras-skills      = { path = "ras-skills",      version = "2.0.0" }
-ras-mcp         = { path = "ras-mcp",         version = "2.0.0" }
-ras-cloud       = { path = "ras-cloud",       version = "2.0.0" }
+ras-browser     = { path = "ras-browser",     version = "2.1.0" }
+ras-dom         = { path = "ras-dom",         version = "2.1.0" }
+ras-tools       = { path = "ras-tools",       version = "2.1.0" }
+ras-watchdogs   = { path = "ras-watchdogs",   version = "2.1.0" }
+ras-filesystem  = { path = "ras-filesystem",  version = "2.1.0" }
+ras-tokens      = { path = "ras-tokens",      version = "2.1.0" }
+ras-judge       = { path = "ras-judge",       version = "2.1.0" }
+ras-telemetry   = { path = "ras-telemetry",   version = "2.1.0" }
+ras-recording   = { path = "ras-recording",   version = "2.1.0" }
+ras-sandbox     = { path = "ras-sandbox",     version = "2.1.0" }
+ras-skills      = { path = "ras-skills",      version = "2.1.0" }
+ras-mcp         = { path = "ras-mcp",         version = "2.1.0" }
+ras-cloud       = { path = "ras-cloud",       version = "2.1.0" }
 
-ras-agent       = { path = "ras-agent",       version = "2.0.0" }
+ras-agent       = { path = "ras-agent",       version = "2.1.0" }
 
 async-trait        = "0.1"
 tokio              = { version = "1", features = ["full"] }
