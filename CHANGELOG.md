@@ -8,6 +8,12 @@ Versioning policy:
 - **1.0.0** ships when all 11 phases land and `examples/claude_code_oauth_cosmium.rs` runs end-to-end against a live cosmium binary.
 
 ## [Unreleased]
+## [2.0.0] - Major bump + main branch + crates.io publish
+
+- Pin Rust toolchain to **1.95.0** (latest stable as of 2026-04-16); CI workflows + audit + workspace `rust-version` all aligned. Profile `minimal` to skip `rust-docs`.
+- `main` becomes the default branch; `develop` remains the integration branch.
+- crates.io publish workflow uses precompiled `cargo-workspaces` via `taiki-e/install-action` (avoids MSRV friction).
+- Publish gate: minor or major bump AND tag reachable from `origin/main`.
 ## [2.0.0] - Major bump + main branch + first crates.io publish
 
 - Branch policy: `main` becomes the default branch; `develop` is the integration branch.
