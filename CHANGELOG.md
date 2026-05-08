@@ -9,15 +9,22 @@ Versioning policy:
 
 ## [Unreleased]
 
+## [0.3.0] - Phase 2 — CDP + cosmium + ChatAnthropicClaudeCode
+
+- ras-cdp infra: `ChromiumoxideAdapter` implementing `BrowserPort` (navigate, click, type, screenshot, target lifecycle), `within()` per-request timeout wrapper.
+- ras-cosmium infra: `CosmiumProcessLauncher` (subprocess spawn, free-port, tempdir for `--user-data-dir`, `--cosmium-*` flag mapping, ready-poll via `/json/version`), `resolve_attach_url()` for attach mode.
+- ras-llm-anthropic infra: ★ `ChatAnthropicClaudeCode` decorator over `ChatAnthropic`. 4-tier auth chain (`ResolveOauthCredentials`): `ANTHROPIC_API_KEY` bail → `MacosKeychain` (via `security` cmd) → `~/.claude/.credentials.json` → `~/.claude/settings.json`. Billing header injection (`inject_billing_header`) + byte-parity headers + `claude --version` parsing fallback.
+- 8 tests pass: billing header text + injection (existing system / no system), cc_version semver guard + fallback, cosmium profile flag emission.
+
 ## [0.2.0] - Phase 1 — Domain layer
 
-- Pure domain types and ports across all 37 lib crates: `BrowserEvent`, `BrowserPort`, `LlmClient` + `ChatMessage` family, `CosmiumProfile` + `BrowserLauncher`, `BrowserSession` + `SessionMode`, `EnhancedDomTreeNode` + `ClickableElement` + `BrowserStateSummary`, `ActionRegistry` + `ToolHandler`, `Watchdog` trait, `BaseFile` + `FileSystemPort`, `TokenCostService`, `JudgePort`, `TelemetryClient` + `NoopTelemetry`, `RecorderPort`, `SandboxRunner`, `SkillsPort`, `McpClientPort`/`McpServerPort`, `CloudClient`, `AgentHistory`/`AgentOutput`/`AgentBrain`/`PlanItem`/`StepMetadata`/`ActionLoopDetector`/`PageFingerprint`.
-- Claude Code OAuth domain: `ClaudeCodeCredentials` (with `CredentialSource`, expiry guard), `BillingHeader`, `CcVersion` newtype + `FALLBACK_CC_VERSION`, header byte-parity constants (`ANTHROPIC_BASE_URL`, `ANTHROPIC_VERSION`, `OAUTH_BETA`).
-- Centralized `AppError` re-exposed; `cargo check --workspace` passes for all 39 members.
+- Pure domain types and ports across all 37 lib crates.
+- Claude Code OAuth domain types, `BrowserEvent`/`EventBus`, `BrowserPort`, `LlmClient` + chat messages, DOM tree + clickable, action registry, watchdog port, file system, judge, telemetry, recording, sandbox, skills, MCP, cloud, agent history + plan + step metadata + loop detector.
+- `cargo check --workspace` passes for all 39 members.
 
 ## [0.1.0] - Phase 0 — workspace scaffold
 
 - Workspace layout: 36 member crates flat at root + `xtask`.
-- Hexagonal vertical-slice shape per crate (`domain/`, `application/`, `infrastructure/`).
-- `lefthook.yml` for pre-commit (fmt + clippy + LOC + no-comments + no-unwrap + deny) and pre-push (test + doc + audit + bump-gate).
+- Hexagonal vertical-slice shape per crate.
+- `lefthook.yml` for pre-commit and pre-push.
 - `xtask bump {major|minor|patch}` automation.
