@@ -8,6 +8,9 @@ Versioning policy:
 - **1.0.0** ships when all 11 phases land and `examples/claude_code_oauth_cosmium.rs` runs end-to-end against a live cosmium binary.
 
 ## [Unreleased]
+## [1.0.3] - Pin remaining dependabot conflicts
+
+- Add `schemars` (semver-major), `validator`, `wiremock` to dependabot ignore list. Closed PRs #4, #5, #8.
 ## [1.0.2] - CI release permissions + dependabot pin
 
 - `release.yml`: add `permissions: contents: write` so the workflow can attach binaries to manually-created releases.

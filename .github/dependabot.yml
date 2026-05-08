@@ -10,6 +10,10 @@ updates:
         update-types: ["version-update:semver-major"]
       - dependency-name: "chromiumoxide"
         update-types: ["version-update:semver-major"]
+      - dependency-name: "schemars"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "validator"
+      - dependency-name: "wiremock"
     groups:
       tokio-stack:
         patterns:
