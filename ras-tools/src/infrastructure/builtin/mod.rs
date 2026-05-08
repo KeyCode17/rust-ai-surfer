@@ -1,0 +1,8 @@
+pub mod click;
+pub mod done;
+pub mod navigate;
+pub mod register;
+pub mod screenshot;
+pub mod scroll;
+pub mod type_text;
+pub mod wait;

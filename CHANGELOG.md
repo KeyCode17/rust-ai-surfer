@@ -8,6 +8,13 @@ Versioning policy:
 - **1.0.0** ships when all 11 phases land and `examples/claude_code_oauth_cosmium.rs` runs end-to-end against a live cosmium binary.
 
 ## [Unreleased]
+## [0.5.0] - Phase 4 — Tools registry + built-ins
+
+- 8 default actions: navigate, click_element, click_coordinate, type_text, scroll, screenshot, wait, done.
+- `register_default_actions` populates `ActionRegistry`; `terminates_sequence` flag set on navigate + done.
+- click variant pair (index/coordinate) for OAuth/anthropic-style coord clicking opt-in.
+- screenshot encodes PNG to base64 via inline encoder (no extra dep).
+- 5 registry tests pass.
 ## [0.4.0] - Phase 3 — Agent step loop
 
 - `RunAgent` orchestrator + `RunStep` use case (LLM call + parse + history append + loop-detector update + step-interval tracking).

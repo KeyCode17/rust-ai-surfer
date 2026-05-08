@@ -1771,7 +1771,7 @@ dependencies = [
 
 [[package]]
 name = "ras-agent"
-version = "0.3.0"
+version = "0.4.0"
 dependencies = [
  "async-trait",
  "chrono",
@@ -1803,7 +1803,7 @@ dependencies = [
 
 [[package]]
 name = "ras-browser"
-version = "0.3.0"
+version = "0.4.0"
 dependencies = [
  "async-trait",
  "ras-cdp",
@@ -1821,7 +1821,7 @@ dependencies = [
 
 [[package]]
 name = "ras-cdp"
-version = "0.3.0"
+version = "0.4.0"
 dependencies = [
  "async-trait",
  "chromiumoxide",
@@ -1840,7 +1840,7 @@ dependencies = [
 
 [[package]]
 name = "ras-cli"
-version = "0.3.0"
+version = "0.4.0"
 dependencies = [
  "anyhow",
  "clap",
@@ -1870,7 +1870,7 @@ dependencies = [
 
 [[package]]
 name = "ras-cloud"
-version = "0.3.0"
+version = "0.4.0"
 dependencies = [
  "async-trait",
  "ras-errors",
@@ -1887,7 +1887,7 @@ dependencies = [
 
 [[package]]
 name = "ras-config"
-version = "0.3.0"
+version = "0.4.0"
 dependencies = [
  "dotenvy",
  "once_cell",
@@ -1901,7 +1901,7 @@ dependencies = [
 
 [[package]]
 name = "ras-cosmium"
-version = "0.3.0"
+version = "0.4.0"
 dependencies = [
  "async-trait",
  "ras-cdp",
@@ -1918,7 +1918,7 @@ dependencies = [
 
 [[package]]
 name = "ras-daemon"
-version = "0.3.0"
+version = "0.4.0"
 dependencies = [
  "anyhow",
  "ras-browser",
@@ -1937,7 +1937,7 @@ dependencies = [
 
 [[package]]
 name = "ras-dom"
-version = "0.3.0"
+version = "0.4.0"
 dependencies = [
  "async-trait",
  "image",
@@ -1955,7 +1955,7 @@ dependencies = [
 
 [[package]]
 name = "ras-errors"
-version = "0.3.0"
+version = "0.4.0"
 dependencies = [
  "serde",
  "thiserror 2.0.18",
@@ -1963,7 +1963,7 @@ dependencies = [
 
 [[package]]
 name = "ras-events"
-version = "0.3.0"
+version = "0.4.0"
 dependencies = [
  "async-broadcast",
  "async-trait",
@@ -1981,7 +1981,7 @@ dependencies = [
 
 [[package]]
 name = "ras-filesystem"
-version = "0.3.0"
+version = "0.4.0"
 dependencies = [
  "async-trait",
  "ras-errors",
@@ -1995,7 +1995,7 @@ dependencies = [
 
 [[package]]
 name = "ras-judge"
-version = "0.3.0"
+version = "0.4.0"
 dependencies = [
  "async-trait",
  "image",
@@ -2010,7 +2010,7 @@ dependencies = [
 
 [[package]]
 name = "ras-llm"
-version = "0.3.0"
+version = "0.4.0"
 dependencies = [
  "async-trait",
  "ras-errors",
@@ -2024,7 +2024,7 @@ dependencies = [
 
 [[package]]
 name = "ras-llm-anthropic"
-version = "0.3.0"
+version = "0.4.0"
 dependencies = [
  "async-trait",
  "chrono",
@@ -2047,7 +2047,7 @@ dependencies = [
 
 [[package]]
 name = "ras-llm-bedrock"
-version = "0.3.0"
+version = "0.4.0"
 dependencies = [
  "async-trait",
  "ras-errors",
@@ -2064,7 +2064,7 @@ dependencies = [
 
 [[package]]
 name = "ras-llm-cerebras"
-version = "0.3.0"
+version = "0.4.0"
 dependencies = [
  "async-trait",
  "ras-errors",
@@ -2081,7 +2081,7 @@ dependencies = [
 
 [[package]]
 name = "ras-llm-cloud"
-version = "0.3.0"
+version = "0.4.0"
 dependencies = [
  "async-trait",
  "ras-errors",
@@ -2098,7 +2098,7 @@ dependencies = [
 
 [[package]]
 name = "ras-llm-deepseek"
-version = "0.3.0"
+version = "0.4.0"
 dependencies = [
  "async-trait",
  "ras-errors",
@@ -2115,7 +2115,7 @@ dependencies = [
 
 [[package]]
 name = "ras-llm-google"
-version = "0.3.0"
+version = "0.4.0"
 dependencies = [
  "async-trait",
  "ras-errors",
@@ -2132,7 +2132,7 @@ dependencies = [
 
 [[package]]
 name = "ras-llm-groq"
-version = "0.3.0"
+version = "0.4.0"
 dependencies = [
  "async-trait",
  "ras-errors",
@@ -2149,7 +2149,7 @@ dependencies = [
 
 [[package]]
 name = "ras-llm-langchain"
-version = "0.3.0"
+version = "0.4.0"
 dependencies = [
  "async-trait",
  "ras-errors",
@@ -2166,7 +2166,7 @@ dependencies = [
 
 [[package]]
 name = "ras-llm-mistral"
-version = "0.3.0"
+version = "0.4.0"
 dependencies = [
  "async-trait",
  "ras-errors",
@@ -2183,7 +2183,7 @@ dependencies = [
 
 [[package]]
 name = "ras-llm-oci"
-version = "0.3.0"
+version = "0.4.0"
 dependencies = [
  "async-trait",
  "ras-errors",
@@ -2200,7 +2200,7 @@ dependencies = [
 
 [[package]]
 name = "ras-llm-ollama"
-version = "0.3.0"
+version = "0.4.0"
 dependencies = [
  "async-trait",
  "ras-errors",
@@ -2217,7 +2217,7 @@ dependencies = [
 
 [[package]]
 name = "ras-llm-openai"
-version = "0.3.0"
+version = "0.4.0"
 dependencies = [
  "async-trait",
  "ras-errors",
@@ -2234,7 +2234,7 @@ dependencies = [
 
 [[package]]
 name = "ras-llm-openrouter"
-version = "0.3.0"
+version = "0.4.0"
 dependencies = [
  "async-trait",
  "ras-errors",
@@ -2251,7 +2251,7 @@ dependencies = [
 
 [[package]]
 name = "ras-llm-vercel"
-version = "0.3.0"
+version = "0.4.0"
 dependencies = [
  "async-trait",
  "ras-errors",
@@ -2268,7 +2268,7 @@ dependencies = [
 
 [[package]]
 name = "ras-mcp"
-version = "0.3.0"
+version = "0.4.0"
 dependencies = [
  "async-trait",
  "ras-errors",
@@ -2285,7 +2285,7 @@ dependencies = [
 
 [[package]]
 name = "ras-recording"
-version = "0.3.0"
+version = "0.4.0"
 dependencies = [
  "async-trait",
  "image",
@@ -2300,7 +2300,7 @@ dependencies = [
 
 [[package]]
 name = "ras-sandbox"
-version = "0.3.0"
+version = "0.4.0"
 dependencies = [
  "async-trait",
  "ras-errors",
@@ -2313,7 +2313,7 @@ dependencies = [
 
 [[package]]
 name = "ras-skills"
-version = "0.3.0"
+version = "0.4.0"
 dependencies = [
  "async-trait",
  "ras-errors",
@@ -2330,7 +2330,7 @@ dependencies = [
 
 [[package]]
 name = "ras-telemetry"
-version = "0.3.0"
+version = "0.4.0"
 dependencies = [
  "async-trait",
  "ras-errors",
@@ -2344,7 +2344,7 @@ dependencies = [
 
 [[package]]
 name = "ras-tokens"
-version = "0.3.0"
+version = "0.4.0"
 dependencies = [
  "async-trait",
  "chrono",
@@ -2362,7 +2362,7 @@ dependencies = [
 
 [[package]]
 name = "ras-tools"
-version = "0.3.0"
+version = "0.4.0"
 dependencies = [
  "async-trait",
  "indexmap",
@@ -2383,7 +2383,7 @@ dependencies = [
 
 [[package]]
 name = "ras-types"
-version = "0.3.0"
+version = "0.4.0"
 dependencies = [
  "chrono",
  "indexmap",
@@ -2399,7 +2399,7 @@ dependencies = [
 
 [[package]]
 name = "ras-validation"
-version = "0.3.0"
+version = "0.4.0"
 dependencies = [
  "async-trait",
  "ras-errors",
@@ -2413,7 +2413,7 @@ dependencies = [
 
 [[package]]
 name = "ras-watchdogs"
-version = "0.3.0"
+version = "0.4.0"
 dependencies = [
  "async-trait",
  "ras-cdp",
