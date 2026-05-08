@@ -8,6 +8,9 @@ Versioning policy:
 - **1.0.0** ships when all 11 phases land and `examples/claude_code_oauth_cosmium.rs` runs end-to-end against a live cosmium binary.
 
 ## [Unreleased]
+## [1.0.4] - README refresh
+
+- Update `README.md`: add CI / release / license / Rust badges, expand "What's in the box" to reflect shipped capabilities, document CLI subcommands, link ADRs, document lefthook hook matrix, mention bump-gate flow.
 ## [1.0.3] - Pin remaining dependabot conflicts
 
 - Add `schemars` (semver-major), `validator`, `wiremock` to dependabot ignore list. Closed PRs #4, #5, #8.
