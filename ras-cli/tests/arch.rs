@@ -20,7 +20,7 @@ fn domain_modules_do_not_import_third_party_sdks() {
         .filter_map(Result::ok)
     {
         let p = entry.path();
-        if !p.extension().is_some_and(|e| e == "rs") {
+        if p.extension().is_none_or(|e| e != "rs") {
             continue;
         }
         let s = p.to_string_lossy();

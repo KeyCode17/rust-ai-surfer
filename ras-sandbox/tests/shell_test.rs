@@ -6,7 +6,7 @@ use ras_sandbox::infrastructure::subprocess_runner::ShellSandbox;
 
 #[tokio::test]
 async fn echo_returns_stdout() {
-    let r = ShellSandbox::default()
+    let r = ShellSandbox
         .run(ExecutionRequest {
             script: "echo hello".into(),
             timeout: Duration::from_secs(5),
@@ -20,7 +20,7 @@ async fn echo_returns_stdout() {
 
 #[tokio::test]
 async fn nonzero_exit_propagates() {
-    let r = ShellSandbox::default()
+    let r = ShellSandbox
         .run(ExecutionRequest {
             script: "exit 7".into(),
             timeout: Duration::from_secs(5),

@@ -81,7 +81,7 @@ fn check_loc(max: usize) -> Result<()> {
         .filter_map(Result::ok)
     {
         let p = entry.path();
-        if !p.extension().is_some_and(|e| e == "rs") {
+        if p.extension().is_none_or(|e| e != "rs") {
             continue;
         }
         let s = p.to_string_lossy();

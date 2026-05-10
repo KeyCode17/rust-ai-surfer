@@ -38,7 +38,7 @@ impl Config {
         let home_dir = env::var("RAS_HOME")
             .ok()
             .map(PathBuf::from)
-            .or_else(|| dirs_home())
+            .or_else(dirs_home)
             .ok_or_else(|| ConfigError::MissingEnv("RAS_HOME".into()))?;
         let config_dir = env::var("RAS_CONFIG_DIR")
             .map(PathBuf::from)

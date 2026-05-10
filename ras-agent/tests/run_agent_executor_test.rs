@@ -378,18 +378,17 @@ async fn dom_extractor_grounding_reaches_next_prompt() {
         if let ChatMessage::User(u) = m {
             for p in &u.content {
                 match p {
-                    ContentPart::Text { text } => {
+                    ContentPart::Text { text }
                         if text.contains("clickable_elements:")
                             && text.contains("[0] button \"Sign in\"")
-                            && text.contains("[1] input \"Email\"")
-                        {
-                            saw_clickable_map = true;
-                        }
+                            && text.contains("[1] input \"Email\"") =>
+                    {
+                        saw_clickable_map = true;
                     }
-                    ContentPart::ImageBase64 { data, .. } => {
-                        if data == "EXTRACTOR_SCREENSHOT_BYTES" {
-                            saw_extractor_screenshot = true;
-                        }
+                    ContentPart::ImageBase64 { data, .. }
+                        if data == "EXTRACTOR_SCREENSHOT_BYTES" =>
+                    {
+                        saw_extractor_screenshot = true;
                     }
                     _ => {}
                 }

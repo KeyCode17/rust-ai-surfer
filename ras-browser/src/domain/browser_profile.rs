@@ -43,10 +43,10 @@ impl AllowedDomains {
         if self.patterns.is_empty() {
             return true;
         }
-        if let Some(host) = url.host_str() {
-            if self.cache.contains(host) {
-                return true;
-            }
+        if let Some(host) = url.host_str()
+            && self.cache.contains(host)
+        {
+            return true;
         }
         self.patterns.iter().any(|p| p.matches_url(url))
     }

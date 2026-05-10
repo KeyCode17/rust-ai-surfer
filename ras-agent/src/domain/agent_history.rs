@@ -47,8 +47,7 @@ impl AgentHistoryList {
             .iter()
             .flat_map(|h| h.steps.iter())
             .flat_map(|s| s.results.iter())
-            .filter(|r| r.is_done)
-            .last()
+            .rfind(|r| r.is_done)
             .and_then(|r| r.extracted_content.as_deref())
     }
 
