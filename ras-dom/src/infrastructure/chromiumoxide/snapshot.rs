@@ -32,7 +32,7 @@ async fn capture_snapshot_inner(
     let page = page_for(browser, target).await?;
 
     let params = CaptureSnapshotParams::builder()
-        .computed_styles(std::iter::empty::<String>())
+        .computed_styles(["display".to_string()])
         .include_paint_order(true)
         .include_dom_rects(true)
         .build()
@@ -148,23 +148,4 @@ fn base64_encode(bytes: &[u8]) -> String {
         out.push('=');
     }
     out
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn capture_snapshot_params_build_with_empty_computed_styles() {
-        let params = CaptureSnapshotParams::builder()
-            .computed_styles(std::iter::empty::<String>())
-            .include_paint_order(true)
-            .include_dom_rects(true)
-            .build();
-        assert!(
-            params.is_ok(),
-            "snapshot params must build with empty computed_styles: {:?}",
-            params.err()
-        );
-    }
 }
