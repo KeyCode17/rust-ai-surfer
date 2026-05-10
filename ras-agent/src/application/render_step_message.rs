@@ -1,5 +1,6 @@
 use ras_llm::{ChatMessage, ContentPart};
 
+use crate::application::clickable_map::render_clickable_map;
 use crate::domain::agent_history::StepRecord;
 
 const TEXT_BUDGET: usize = 480;
@@ -7,42 +8,54 @@ const ERROR_BUDGET: usize = 240;
 const SCREENSHOT_MEDIA_TYPE: &str = "image/png";
 
 pub(crate) fn render_step_message(step: &StepRecord) -> Option<ChatMessage> {
-    if step.results.is_empty() {
+    if step.results.is_empty() && step.summary.is_none() {
         return None;
     }
     let mut text = format!("Step {} result:\n", step.step.0);
     if let Some(url) = &step.url {
         text.push_str(&format!("url: {url}\n"));
     }
-    text.push_str("action results:\n");
-    for (i, r) in step.results.iter().enumerate() {
-        text.push_str(&format!("  [{i}]"));
-        if r.is_done {
-            text.push_str(" done");
+    if !step.results.is_empty() {
+        text.push_str("action results:\n");
+        for (i, r) in step.results.iter().enumerate() {
+            text.push_str(&format!("  [{i}]"));
+            if r.is_done {
+                text.push_str(" done");
+            }
+            if let Some(err) = &r.error {
+                text.push_str(&format!(" error: {}", truncate(err, ERROR_BUDGET)));
+            } else if let Some(c) = &r.extracted_content {
+                text.push_str(&format!(" {}", truncate(c, TEXT_BUDGET)));
+            }
+            text.push('\n');
         }
-        if let Some(err) = &r.error {
-            text.push_str(&format!(" error: {}", truncate(err, ERROR_BUDGET)));
-        } else if let Some(c) = &r.extracted_content {
-            text.push_str(&format!(" {}", truncate(c, TEXT_BUDGET)));
-        }
-        text.push('\n');
+    }
+    if let Some(summary) = &step.summary {
+        text.push_str(&render_clickable_map(summary));
     }
 
-    let mut parts: Vec<ContentPart> = Vec::with_capacity(1 + image_count(step));
+    let mut parts: Vec<ContentPart> = Vec::with_capacity(2);
     parts.push(ContentPart::Text { text });
-    for r in &step.results {
-        for img_b64 in &r.images {
-            parts.push(ContentPart::ImageBase64 {
-                media_type: SCREENSHOT_MEDIA_TYPE.into(),
-                data: img_b64.clone(),
-            });
+    if let Some(b64) = step
+        .summary
+        .as_ref()
+        .and_then(|s| s.screenshot_b64.as_ref())
+    {
+        parts.push(ContentPart::ImageBase64 {
+            media_type: SCREENSHOT_MEDIA_TYPE.into(),
+            data: b64.clone(),
+        });
+    } else {
+        for r in &step.results {
+            for img_b64 in &r.images {
+                parts.push(ContentPart::ImageBase64 {
+                    media_type: SCREENSHOT_MEDIA_TYPE.into(),
+                    data: img_b64.clone(),
+                });
+            }
         }
     }
     Some(ChatMessage::user_parts(parts))
-}
-
-fn image_count(step: &StepRecord) -> usize {
-    step.results.iter().map(|r| r.images.len()).sum()
 }
 
 fn truncate(s: &str, max: usize) -> String {
