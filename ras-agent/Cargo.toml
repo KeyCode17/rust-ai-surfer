@@ -39,3 +39,8 @@ indexmap        = { workspace = true }
 chrono          = { workspace = true }
 regex           = { workspace = true }
 
+[dev-dependencies]
+async-trait     = { workspace = true }
+tokio           = { workspace = true, features = ["macros", "rt-multi-thread"] }
+serde_json      = { workspace = true }
+

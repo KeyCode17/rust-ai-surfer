@@ -21,5 +21,7 @@ ras-agent          = { path = "../ras-agent" }
 ras-browser        = { path = "../ras-browser" }
 ras-cdp            = { path = "../ras-cdp" }
 ras-cosmium        = { path = "../ras-cosmium" }
+ras-events         = { path = "../ras-events" }
 ras-llm            = { path = "../ras-llm" }
 ras-llm-anthropic  = { path = "../ras-llm-anthropic", features = ["claude-code"] }
+ras-tools          = { path = "../ras-tools" }

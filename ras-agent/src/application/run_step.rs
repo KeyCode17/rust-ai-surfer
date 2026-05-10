@@ -2,9 +2,13 @@ use std::sync::Arc;
 use std::time::Instant;
 
 use chrono::Utc;
+use ras_cdp::BrowserPort;
 use ras_errors::AppError;
+use ras_events::EventBus;
 use ras_llm::{ChatMessage, ChatResponse, InvokeOptions, LlmClient};
+use ras_tools::domain::registry::{ActionRegistry, ToolContext};
 use ras_types::{ActionResult, StepId};
+use url::Url;
 
 use crate::application::compute_action_hash::compute_action_hash;
 use crate::application::detect_loop::{build_budget_warning, build_loop_nudge};
@@ -17,14 +21,26 @@ use crate::domain::step_metadata::StepMetadata;
 pub struct RunStep {
     primary_llm: Arc<dyn LlmClient>,
     fallback_llm: Option<Arc<dyn LlmClient>>,
+    registry: Arc<ActionRegistry>,
+    browser: Arc<dyn BrowserPort>,
+    events: Arc<dyn EventBus>,
 }
 
 impl RunStep {
     #[must_use]
-    pub fn new(primary: Arc<dyn LlmClient>, fallback: Option<Arc<dyn LlmClient>>) -> Self {
+    pub fn new(
+        primary: Arc<dyn LlmClient>,
+        fallback: Option<Arc<dyn LlmClient>>,
+        registry: Arc<ActionRegistry>,
+        browser: Arc<dyn BrowserPort>,
+        events: Arc<dyn EventBus>,
+    ) -> Self {
         Self {
             primary_llm: primary,
             fallback_llm: fallback,
+            registry,
+            browser,
+            events,
         }
     }
 
@@ -45,9 +61,51 @@ impl RunStep {
         }
         let response = self.invoke_with_fallback(messages).await?;
         let output = parse_agent_output(&response)?;
+
+        let target = self.browser.focused_target().await.ok();
+        let page_url = match &target {
+            Some(t) => self
+                .browser
+                .evaluate(t, "location.href")
+                .await
+                .ok()
+                .and_then(|v| v.as_str().and_then(|s| Url::parse(s).ok())),
+            None => None,
+        };
+
+        let mut results = Vec::new();
         for action in &output.action {
             detector.record_action(compute_action_hash(action));
+            let Some(reg) = self.registry.get(&action.name) else {
+                results.push(ActionResult::err(format!(
+                    "unknown action: {}",
+                    action.name.0
+                )));
+                break;
+            };
+            let ctx = ToolContext {
+                browser: self.browser.clone(),
+                events: self.events.clone(),
+                page_url: page_url.clone(),
+                available_files: Vec::new(),
+            };
+            match reg.handler.execute(action.parameters.clone(), ctx).await {
+                Ok(r) => {
+                    let terminates = reg.metadata.terminates_sequence;
+                    let is_done = r.is_done;
+                    let is_err = r.is_error();
+                    results.push(r);
+                    if terminates || is_done || is_err {
+                        break;
+                    }
+                }
+                Err(e) => {
+                    results.push(ActionResult::err(e.to_string()));
+                    break;
+                }
+            }
         }
+
         let metadata = StepMetadata {
             duration_ms: started.elapsed().as_millis() as u64,
             step_interval_ms: None,
@@ -58,9 +116,9 @@ impl RunStep {
         Ok(StepRecord {
             step,
             started_at: Utc::now(),
-            url: None,
+            url: page_url,
             output,
-            results: Vec::new(),
+            results,
             metadata,
         })
     }

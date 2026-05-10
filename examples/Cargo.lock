@@ -1072,9 +1072,9 @@ dependencies = [
 
 [[package]]
 name = "image"
-version = "0.25.9"
+version = "0.25.10"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e6506c6c10786659413faa717ceebcb8f70731c0a60cbae39795fdf114519c1a"
+checksum = "85ab80394333c02fe689eaf900ab500fbd0c2213da414687ebf995a65d5a6104"
 dependencies = [
  "bytemuck",
  "byteorder-lite",
@@ -1238,9 +1238,9 @@ dependencies = [
 
 [[package]]
 name = "moxcms"
-version = "0.7.11"
+version = "0.8.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ac9557c559cd6fc9867e122e20d2cbefc9ca29d80d027a8e39310920ed2f0a97"
+checksum = "bb85c154ba489f01b25c0d36ae69a87e4a1c73a72631fc6c0eb6dde34a73e44b"
 dependencies = [
  "num-traits",
  "pxfm",
@@ -1535,7 +1535,7 @@ dependencies = [
 
 [[package]]
 name = "ras-agent"
-version = "0.11.0"
+version = "2.1.2"
 dependencies = [
  "async-trait",
  "chrono",
@@ -1567,7 +1567,7 @@ dependencies = [
 
 [[package]]
 name = "ras-browser"
-version = "0.11.0"
+version = "2.1.2"
 dependencies = [
  "async-trait",
  "ras-cdp",
@@ -1585,7 +1585,7 @@ dependencies = [
 
 [[package]]
 name = "ras-cdp"
-version = "0.11.0"
+version = "2.1.2"
 dependencies = [
  "async-trait",
  "chromiumoxide",
@@ -1604,7 +1604,7 @@ dependencies = [
 
 [[package]]
 name = "ras-cosmium"
-version = "0.11.0"
+version = "2.1.2"
 dependencies = [
  "async-trait",
  "ras-cdp",
@@ -1621,7 +1621,7 @@ dependencies = [
 
 [[package]]
 name = "ras-dom"
-version = "0.11.0"
+version = "2.1.2"
 dependencies = [
  "async-trait",
  "image",
@@ -1639,7 +1639,7 @@ dependencies = [
 
 [[package]]
 name = "ras-errors"
-version = "0.11.0"
+version = "2.1.2"
 dependencies = [
  "serde",
  "thiserror 2.0.18",
@@ -1647,7 +1647,7 @@ dependencies = [
 
 [[package]]
 name = "ras-events"
-version = "0.11.0"
+version = "2.1.2"
 dependencies = [
  "async-broadcast",
  "async-trait",
@@ -1673,8 +1673,10 @@ dependencies = [
  "ras-browser",
  "ras-cdp",
  "ras-cosmium",
+ "ras-events",
  "ras-llm",
  "ras-llm-anthropic",
+ "ras-tools",
  "tokio",
  "tracing",
  "tracing-subscriber",
@@ -1683,7 +1685,7 @@ dependencies = [
 
 [[package]]
 name = "ras-filesystem"
-version = "0.11.0"
+version = "2.1.2"
 dependencies = [
  "async-trait",
  "ras-errors",
@@ -1697,7 +1699,7 @@ dependencies = [
 
 [[package]]
 name = "ras-judge"
-version = "0.11.0"
+version = "2.1.2"
 dependencies = [
  "async-trait",
  "image",
@@ -1712,7 +1714,7 @@ dependencies = [
 
 [[package]]
 name = "ras-llm"
-version = "0.11.0"
+version = "2.1.2"
 dependencies = [
  "async-trait",
  "ras-errors",
@@ -1726,7 +1728,7 @@ dependencies = [
 
 [[package]]
 name = "ras-llm-anthropic"
-version = "0.11.0"
+version = "2.1.2"
 dependencies = [
  "async-trait",
  "chrono",
@@ -1747,7 +1749,7 @@ dependencies = [
 
 [[package]]
 name = "ras-telemetry"
-version = "0.11.0"
+version = "2.1.2"
 dependencies = [
  "async-trait",
  "ras-errors",
@@ -1761,7 +1763,7 @@ dependencies = [
 
 [[package]]
 name = "ras-tokens"
-version = "0.11.0"
+version = "2.1.2"
 dependencies = [
  "async-trait",
  "chrono",
@@ -1779,7 +1781,7 @@ dependencies = [
 
 [[package]]
 name = "ras-tools"
-version = "0.11.0"
+version = "2.1.2"
 dependencies = [
  "async-trait",
  "indexmap",
@@ -1800,7 +1802,7 @@ dependencies = [
 
 [[package]]
 name = "ras-types"
-version = "0.11.0"
+version = "2.1.2"
 dependencies = [
  "chrono",
  "indexmap",
@@ -1816,7 +1818,7 @@ dependencies = [
 
 [[package]]
 name = "ras-watchdogs"
-version = "0.11.0"
+version = "2.1.2"
 dependencies = [
  "async-trait",
  "ras-browser",
@@ -2197,12 +2199,12 @@ checksum = "67b1b7a3b5fe4f1376887184045fcf45c69e92af734b7aaddc05fb777b6fbd03"
 
 [[package]]
 name = "smol_str"
-version = "0.3.2"
+version = "0.3.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9676b89cd56310a87b93dec47b11af744f34d5fc9f367b829474eec0a891350d"
+checksum = "4aaa7368fcf4852a4c2dd92df0cace6a71f2091ca0a23391ce7f3a31833f1523"
 dependencies = [
  "borsh",
- "serde",
+ "serde_core",
 ]
 
 [[package]]
