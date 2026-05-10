@@ -15,6 +15,7 @@ use url::Url;
 use crate::domain::repository::{BrowserPort, ScreenshotFormat};
 use crate::domain::viewport::Viewport;
 use crate::infrastructure::chromiumoxide_helpers::{list_target_ids, new_target, page_for};
+use crate::infrastructure::chromiumoxide_input::{click_backend_node, type_chars};
 use crate::infrastructure::timeout::within;
 
 pub struct ChromiumoxideAdapter {
@@ -121,14 +122,7 @@ impl BrowserPort for ChromiumoxideAdapter {
     async fn click_node(&self, target: &TargetId, node: BackendNodeId) -> Result<(), AppError> {
         let page = page_for(&self.browser, target).await?;
         within("click_node", self.request_timeout, async move {
-            let js = format!(
-                "(() => {{ const el = document.body && document.querySelectorAll('*')[{}]; if (el) el.click(); }})()",
-                node.0
-            );
-            page.evaluate(js.as_str())
-                .await
-                .map_err(|e| AppError::ActionFailed(format!("click_node: {e}")))?;
-            Ok(())
+            click_backend_node(&page, node).await
         })
         .await
     }
@@ -137,15 +131,7 @@ impl BrowserPort for ChromiumoxideAdapter {
         let page = page_for(&self.browser, target).await?;
         let text = text.to_string();
         within("type_text", self.request_timeout, async move {
-            for ch in text.chars() {
-                let js = format!(
-                    "document.activeElement && document.activeElement.dispatchEvent(new KeyboardEvent('keydown', {{key: '{ch}'}}))"
-                );
-                page.evaluate(js.as_str())
-                    .await
-                    .map_err(|e| AppError::ActionFailed(format!("type_text: {e}")))?;
-            }
-            Ok(())
+            type_chars(&page, &text).await
         })
         .await
     }
