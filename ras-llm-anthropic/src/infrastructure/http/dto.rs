@@ -28,11 +28,10 @@ pub enum AnthropicContent {
 }
 
 #[derive(Debug, Serialize)]
-pub struct AnthropicImageSource {
-    #[serde(rename = "type")]
-    pub kind: String,
-    pub media_type: String,
-    pub data: String,
+#[serde(tag = "type", rename_all = "snake_case")]
+pub enum AnthropicImageSource {
+    Base64 { media_type: String, data: String },
+    Url { url: String },
 }
 
 #[derive(Debug, Deserialize)]
@@ -113,13 +112,11 @@ fn content_part_to_anthropic(part: ContentPart) -> AnthropicContent {
     match part {
         ContentPart::Text { text } => AnthropicContent::Text { text },
         ContentPart::ImageBase64 { media_type, data } => AnthropicContent::Image {
-            source: AnthropicImageSource {
-                kind: "base64".into(),
-                media_type,
-                data,
-            },
+            source: AnthropicImageSource::Base64 { media_type, data },
         },
-        ContentPart::ImageUrl { url } => AnthropicContent::Text { text: url },
+        ContentPart::ImageUrl { url } => AnthropicContent::Image {
+            source: AnthropicImageSource::Url { url },
+        },
     }
 }
 
@@ -159,4 +156,36 @@ pub fn response_to_chat(
         cache: false,
     };
     (assistant, tool_calls, usage, finish)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn image_base64_serializes_with_native_source() {
+        let part = ContentPart::ImageBase64 {
+            media_type: "image/png".into(),
+            data: "AAAA".into(),
+        };
+        let v = serde_json::to_value(content_part_to_anthropic(part)).expect("serialize");
+        assert_eq!(v["type"], "image");
+        assert_eq!(v["source"]["type"], "base64");
+        assert_eq!(v["source"]["media_type"], "image/png");
+        assert_eq!(v["source"]["data"], "AAAA");
+        assert!(v["source"].get("url").is_none());
+    }
+
+    #[test]
+    fn image_url_serializes_with_native_url_source() {
+        let part = ContentPart::ImageUrl {
+            url: "https://cdn.example.com/page.png".into(),
+        };
+        let v = serde_json::to_value(content_part_to_anthropic(part)).expect("serialize");
+        assert_eq!(v["type"], "image");
+        assert_eq!(v["source"]["type"], "url");
+        assert_eq!(v["source"]["url"], "https://cdn.example.com/page.png");
+        assert!(v["source"].get("data").is_none());
+        assert!(v["source"].get("media_type").is_none());
+    }
 }
