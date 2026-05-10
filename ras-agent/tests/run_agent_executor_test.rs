@@ -86,12 +86,14 @@ impl BrowserPort for MockBrowser {
 
 struct ScriptedLlm {
     responses: Mutex<Vec<String>>,
+    pub received: Mutex<Vec<Vec<ChatMessage>>>,
 }
 
 impl ScriptedLlm {
     fn new(responses: Vec<&str>) -> Self {
         Self {
             responses: Mutex::new(responses.into_iter().rev().map(String::from).collect()),
+            received: Mutex::new(Vec::new()),
         }
     }
 }
@@ -106,9 +108,10 @@ impl LlmClient for ScriptedLlm {
     }
     async fn ainvoke(
         &self,
-        _messages: Vec<ChatMessage>,
+        messages: Vec<ChatMessage>,
         _options: InvokeOptions,
     ) -> Result<ChatResponse, AppError> {
+        self.received.lock().expect("test invariant").push(messages);
         let next = self
             .responses
             .lock()
@@ -228,4 +231,48 @@ async fn agent_recovers_from_markdown_fenced_response() {
     let navs = browser.navigations.lock().expect("test invariant").clone();
     assert_eq!(navs.len(), 1, "navigate should reach browser through fence");
     assert_eq!(navs[0].as_str(), "https://example.com/");
+}
+
+#[tokio::test]
+async fn screenshot_image_reaches_next_prompt_as_image_part() {
+    use ras_llm::ContentPart;
+
+    let mut registry = ActionRegistry::new();
+    register_default_actions(&mut registry).expect("test invariant");
+    let registry = Arc::new(registry);
+
+    let browser: Arc<dyn BrowserPort> = Arc::new(MockBrowser::default());
+    let events: Arc<dyn EventBus> = Arc::new(BroadcastBus::new(16));
+
+    let plan_step1 = r#"{"current_state":{"evaluation_previous_goal":"","memory":"","next_goal":"see page"},"action":[{"name":"screenshot","parameters":{}}]}"#;
+    let plan_step2 = r#"{"current_state":{"evaluation_previous_goal":"saw page","memory":"","next_goal":"finish"},"action":[{"name":"done","parameters":{"text":"Done."}}]}"#;
+    let scripted = Arc::new(ScriptedLlm::new(vec![plan_step1, plan_step2]));
+    let llm: Arc<dyn LlmClient> = scripted.clone();
+
+    RunAgent::new("see page", llm, registry, browser, events)
+        .with_max_steps(5)
+        .execute()
+        .await
+        .expect("agent run");
+
+    let received = scripted.received.lock().expect("test invariant").clone();
+    assert!(received.len() >= 2, "expected at least 2 LLM invocations");
+
+    let step2_msgs = &received[1];
+    let mut saw_image_part = false;
+    for m in step2_msgs {
+        if let ChatMessage::User(u) = m {
+            for p in &u.content {
+                if let ContentPart::ImageBase64 { media_type, data } = p {
+                    assert_eq!(media_type, "image/png");
+                    assert!(!data.is_empty(), "image base64 must not be empty");
+                    saw_image_part = true;
+                }
+            }
+        }
+    }
+    assert!(
+        saw_image_part,
+        "screenshot from step 1 must reach step 2 prompt as ImageBase64 ContentPart"
+    );
 }
