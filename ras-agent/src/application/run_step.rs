@@ -77,6 +77,17 @@ impl RunStep {
             None => None,
         };
 
+        let pre_clickables: Arc<Vec<ras_dom::ClickableElement>> =
+            match (&self.dom_extractor, &target) {
+                (Some(extractor), Some(t)) => extractor
+                    .snapshot(t)
+                    .await
+                    .ok()
+                    .map(|s| Arc::new(s.clickables))
+                    .unwrap_or_else(|| Arc::new(Vec::new())),
+                _ => Arc::new(Vec::new()),
+            };
+
         let mut results = Vec::new();
         for action in &output.action {
             detector.record_action(compute_action_hash(action));
@@ -92,6 +103,7 @@ impl RunStep {
                 events: self.events.clone(),
                 page_url: page_url.clone(),
                 available_files: Vec::new(),
+                clickables: pre_clickables.clone(),
             };
             match reg.handler.execute(action.parameters.clone(), ctx).await {
                 Ok(r) => {

@@ -10,6 +10,10 @@ publish      = false
 name = "claude_code_oauth_cosmium"
 path = "claude_code_oauth_cosmium.rs"
 
+[[example]]
+name = "youtube_search_smoke"
+path = "youtube_search_smoke.rs"
+
 [dependencies]
 anyhow             = "1"
 tokio              = { version = "1", features = ["full"] }
@@ -25,4 +29,5 @@ ras-dom            = { path = "../ras-dom" }
 ras-events         = { path = "../ras-events" }
 ras-llm            = { path = "../ras-llm" }
 ras-llm-anthropic  = { path = "../ras-llm-anthropic", features = ["claude-code"] }
+ras-llm-openrouter = { path = "../ras-llm-openrouter" }
 ras-tools          = { path = "../ras-tools" }

@@ -32,6 +32,7 @@ async fn capture_snapshot_inner(
     let page = page_for(browser, target).await?;
 
     let params = CaptureSnapshotParams::builder()
+        .computed_styles(["display".to_string()])
         .include_paint_order(true)
         .include_dom_rects(true)
         .build()
