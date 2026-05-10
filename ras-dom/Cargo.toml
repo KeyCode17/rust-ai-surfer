@@ -12,16 +12,18 @@ authors.workspace      = true
 workspace = true
 
 [dependencies]
-ras-errors  = { workspace = true }
-ras-types   = { workspace = true }
-ras-cdp     = { workspace = true }
-async-trait = { workspace = true }
-serde       = { workspace = true }
-serde_json  = { workspace = true }
-thiserror   = { workspace = true }
-url            = { workspace = true }
-tracing     = { workspace = true }
-sha2        = { workspace = true }
-indexmap    = { workspace = true }
-image       = { workspace = true }
+ras-errors    = { workspace = true }
+ras-types     = { workspace = true }
+ras-cdp       = { workspace = true }
+async-trait   = { workspace = true }
+chromiumoxide = { workspace = true }
+tokio         = { workspace = true }
+serde         = { workspace = true }
+serde_json    = { workspace = true }
+thiserror     = { workspace = true }
+url           = { workspace = true }
+tracing       = { workspace = true }
+sha2          = { workspace = true }
+indexmap      = { workspace = true }
+image         = { workspace = true }
 
