@@ -276,3 +276,132 @@ async fn screenshot_image_reaches_next_prompt_as_image_part() {
         "screenshot from step 1 must reach step 2 prompt as ImageBase64 ContentPart"
     );
 }
+
+struct ScriptedDomExtractor {
+    pub calls: Mutex<u32>,
+}
+
+#[async_trait]
+impl ras_dom::DomExtractor for ScriptedDomExtractor {
+    async fn snapshot(&self, target: &TargetId) -> Result<ras_dom::BrowserStateSummary, AppError> {
+        *self.calls.lock().expect("test invariant") += 1;
+        Ok(ras_dom::BrowserStateSummary {
+            target: target.clone(),
+            url: "https://example.com/login".parse().expect("test url"),
+            title: "Login".into(),
+            tree: None,
+            clickables: vec![
+                ras_dom::ClickableElement {
+                    index: 0,
+                    backend_node_id: ras_types::BackendNodeId(101),
+                    bbox: ras_dom::BoundingBox {
+                        x: 10.0,
+                        y: 20.0,
+                        width: 80.0,
+                        height: 30.0,
+                    },
+                    xpath: String::new(),
+                    stable_hash: String::new(),
+                    ax_name: Some("Sign in".into()),
+                    tag: "button".into(),
+                    label: None,
+                },
+                ras_dom::ClickableElement {
+                    index: 1,
+                    backend_node_id: ras_types::BackendNodeId(102),
+                    bbox: ras_dom::BoundingBox {
+                        x: 10.0,
+                        y: 60.0,
+                        width: 200.0,
+                        height: 30.0,
+                    },
+                    xpath: String::new(),
+                    stable_hash: String::new(),
+                    ax_name: Some("Email".into()),
+                    tag: "input".into(),
+                    label: None,
+                },
+            ],
+            screenshot_b64: Some("EXTRACTOR_SCREENSHOT_BYTES".into()),
+            tabs: vec![],
+            page_stats: ras_dom::PageStatistics::default(),
+        })
+    }
+
+    async fn highlight(
+        &self,
+        _target: &TargetId,
+        _options: &ras_dom::HighlightOptions,
+    ) -> Result<Vec<u8>, AppError> {
+        Ok(vec![0xFF, 0xD8])
+    }
+}
+
+#[tokio::test]
+async fn dom_extractor_grounding_reaches_next_prompt() {
+    use ras_llm::ContentPart;
+
+    let mut registry = ActionRegistry::new();
+    register_default_actions(&mut registry).expect("test invariant");
+    let registry = Arc::new(registry);
+
+    let browser: Arc<dyn BrowserPort> = Arc::new(MockBrowser::default());
+    let events: Arc<dyn EventBus> = Arc::new(BroadcastBus::new(16));
+    let extractor = Arc::new(ScriptedDomExtractor {
+        calls: Mutex::new(0),
+    });
+
+    let plan_step1 = r#"{"current_state":{"evaluation_previous_goal":"","memory":"","next_goal":"navigate"},"action":[{"name":"navigate","parameters":{"url":"https://example.com/login"}}]}"#;
+    let plan_step2 = r#"{"current_state":{"evaluation_previous_goal":"navigated","memory":"","next_goal":"finish"},"action":[{"name":"done","parameters":{"text":"Done."}}]}"#;
+    let scripted = Arc::new(ScriptedLlm::new(vec![plan_step1, plan_step2]));
+    let llm: Arc<dyn LlmClient> = scripted.clone();
+
+    RunAgent::new("login", llm, registry, browser, events)
+        .with_max_steps(5)
+        .with_dom_extractor(extractor.clone())
+        .execute()
+        .await
+        .expect("agent run");
+
+    assert!(
+        *extractor.calls.lock().expect("test invariant") >= 1,
+        "extractor.snapshot must be called at least once"
+    );
+
+    let received = scripted.received.lock().expect("test invariant").clone();
+    assert!(received.len() >= 2, "expected at least 2 LLM invocations");
+
+    let step2_msgs = &received[1];
+    let mut saw_clickable_map = false;
+    let mut saw_extractor_screenshot = false;
+    for m in step2_msgs {
+        if let ChatMessage::User(u) = m {
+            for p in &u.content {
+                match p {
+                    ContentPart::Text { text } => {
+                        if text.contains("clickable_elements:")
+                            && text.contains("[0] button \"Sign in\"")
+                            && text.contains("[1] input \"Email\"")
+                        {
+                            saw_clickable_map = true;
+                        }
+                    }
+                    ContentPart::ImageBase64 { data, .. } => {
+                        if data == "EXTRACTOR_SCREENSHOT_BYTES" {
+                            saw_extractor_screenshot = true;
+                        }
+                    }
+                    _ => {}
+                }
+            }
+        }
+    }
+    assert!(
+        saw_clickable_map,
+        "step 2 prompt must contain numbered clickable map from snapshot"
+    );
+    assert!(
+        saw_extractor_screenshot,
+        "step 2 prompt must carry the extractor's screenshot bytes"
+    );
+}

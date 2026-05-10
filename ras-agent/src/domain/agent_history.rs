@@ -1,4 +1,5 @@
 use chrono::{DateTime, Utc};
+use ras_dom::BrowserStateSummary;
 use ras_types::{ActionResult, AgentId, StepId};
 use serde::{Deserialize, Serialize};
 use url::Url;
@@ -14,6 +15,8 @@ pub struct StepRecord {
     pub output: AgentOutput,
     pub results: Vec<ActionResult>,
     pub metadata: StepMetadata,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub summary: Option<BrowserStateSummary>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]

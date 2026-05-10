@@ -32,6 +32,11 @@ impl std::fmt::Debug for ChromiumoxideAdapter {
 }
 
 impl ChromiumoxideAdapter {
+    #[must_use]
+    pub fn browser_arc(&self) -> Arc<Mutex<Browser>> {
+        Arc::clone(&self.browser)
+    }
+
     pub async fn connect(cdp_url: Url, request_timeout: Duration) -> Result<Self, AppError> {
         let cfg = HandlerConfig::default();
         let (browser, mut handler) = Browser::connect_with_config(cdp_url.as_str(), cfg)

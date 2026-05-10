@@ -1,3 +1,4 @@
+pub mod clickable_map;
 pub mod compute_action_hash;
 pub mod detect_loop;
 pub mod fallback_llm;

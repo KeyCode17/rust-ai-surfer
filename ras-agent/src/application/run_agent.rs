@@ -1,6 +1,7 @@
 use std::sync::Arc;
 
 use ras_cdp::BrowserPort;
+use ras_dom::DomExtractor;
 use ras_errors::AppError;
 use ras_events::EventBus;
 use ras_llm::{ChatMessage, LlmClient};
@@ -23,6 +24,7 @@ pub struct RunAgent {
     pub registry: Arc<ActionRegistry>,
     pub browser: Arc<dyn BrowserPort>,
     pub events: Arc<dyn EventBus>,
+    pub dom_extractor: Option<Arc<dyn DomExtractor>>,
 }
 
 impl RunAgent {
@@ -42,7 +44,14 @@ impl RunAgent {
             registry,
             browser,
             events,
+            dom_extractor: None,
         }
+    }
+
+    #[must_use]
+    pub fn with_dom_extractor(mut self, extractor: Arc<dyn DomExtractor>) -> Self {
+        self.dom_extractor = Some(extractor);
+        self
     }
 
     #[must_use]
@@ -64,6 +73,7 @@ impl RunAgent {
             self.registry.clone(),
             self.browser.clone(),
             self.events.clone(),
+            self.dom_extractor.clone(),
         );
         let mut detector = ActionLoopDetector::new();
         let mut history = AgentHistory {

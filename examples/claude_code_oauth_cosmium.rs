@@ -5,6 +5,7 @@ use anyhow::{Context, Result};
 use ras_agent::application::run_agent::RunAgent;
 use ras_cdp::BrowserPort;
 use ras_cdp::infrastructure::chromiumoxide_adapter::ChromiumoxideAdapter;
+use ras_dom::{ChromiumoxideDomExtractor, DomExtractor};
 use ras_events::{BroadcastBus, EventBus};
 use ras_llm::LlmClient;
 use ras_llm_anthropic::infrastructure::http::chat_anthropic_claude_code::ChatAnthropicClaudeCode;
@@ -35,11 +36,14 @@ async fn main() -> Result<()> {
     let ws_url = ras_cosmium::infrastructure::attach::resolve_attach_url(&cdp_http)
         .await
         .context("failed to resolve CDP websocket URL - is cosmium running?")?;
-    let browser: Arc<dyn BrowserPort> = Arc::new(
-        ChromiumoxideAdapter::connect(ws_url.clone(), Duration::from_secs(60))
-            .await
-            .context("failed to attach to CDP")?,
-    );
+    let adapter = ChromiumoxideAdapter::connect(ws_url.clone(), Duration::from_secs(60))
+        .await
+        .context("failed to attach to CDP")?;
+    let dom_extractor: Arc<dyn DomExtractor> = Arc::new(ChromiumoxideDomExtractor::new(
+        adapter.browser_arc(),
+        Duration::from_secs(30),
+    ));
+    let browser: Arc<dyn BrowserPort> = Arc::new(adapter);
     println!("[ok] BrowserSession attached to {ws_url}");
 
     let mut registry = ActionRegistry::new();
@@ -49,6 +53,7 @@ async fn main() -> Result<()> {
 
     let history = RunAgent::new(task, llm, registry, browser, events)
         .with_max_steps(10)
+        .with_dom_extractor(dom_extractor)
         .execute()
         .await?;
     let final_text = history.final_result().unwrap_or("(no final result returned)");
