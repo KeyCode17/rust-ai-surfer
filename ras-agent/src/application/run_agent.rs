@@ -1,7 +1,10 @@
 use std::sync::Arc;
 
+use ras_cdp::BrowserPort;
 use ras_errors::AppError;
+use ras_events::EventBus;
 use ras_llm::{ChatMessage, LlmClient};
+use ras_tools::domain::registry::ActionRegistry;
 use ras_types::{AgentId, StepId};
 
 use crate::application::run_step::RunStep;
@@ -14,16 +17,28 @@ pub struct RunAgent {
     pub max_steps: u32,
     pub primary_llm: Arc<dyn LlmClient>,
     pub fallback_llm: Option<Arc<dyn LlmClient>>,
+    pub registry: Arc<ActionRegistry>,
+    pub browser: Arc<dyn BrowserPort>,
+    pub events: Arc<dyn EventBus>,
 }
 
 impl RunAgent {
-    pub fn new(task: impl Into<String>, llm: Arc<dyn LlmClient>) -> Self {
+    pub fn new(
+        task: impl Into<String>,
+        llm: Arc<dyn LlmClient>,
+        registry: Arc<ActionRegistry>,
+        browser: Arc<dyn BrowserPort>,
+        events: Arc<dyn EventBus>,
+    ) -> Self {
         Self {
             agent: AgentId::new(),
             task: task.into(),
             max_steps: 25,
             primary_llm: llm,
             fallback_llm: None,
+            registry,
+            browser,
+            events,
         }
     }
 
@@ -40,7 +55,13 @@ impl RunAgent {
     }
 
     pub async fn execute(self) -> Result<AgentHistoryList, AppError> {
-        let runner = RunStep::new(self.primary_llm.clone(), self.fallback_llm.clone());
+        let runner = RunStep::new(
+            self.primary_llm.clone(),
+            self.fallback_llm.clone(),
+            self.registry.clone(),
+            self.browser.clone(),
+            self.events.clone(),
+        );
         let mut detector = ActionLoopDetector::new();
         let mut history = AgentHistory {
             agent: self.agent,
