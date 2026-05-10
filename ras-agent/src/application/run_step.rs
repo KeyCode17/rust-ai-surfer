@@ -3,6 +3,7 @@ use std::time::Instant;
 
 use chrono::Utc;
 use ras_cdp::BrowserPort;
+use ras_dom::DomExtractor;
 use ras_errors::AppError;
 use ras_events::EventBus;
 use ras_llm::{ChatMessage, ChatResponse, InvokeOptions, LlmClient};
@@ -24,6 +25,7 @@ pub struct RunStep {
     registry: Arc<ActionRegistry>,
     browser: Arc<dyn BrowserPort>,
     events: Arc<dyn EventBus>,
+    dom_extractor: Option<Arc<dyn DomExtractor>>,
 }
 
 impl RunStep {
@@ -34,6 +36,7 @@ impl RunStep {
         registry: Arc<ActionRegistry>,
         browser: Arc<dyn BrowserPort>,
         events: Arc<dyn EventBus>,
+        dom_extractor: Option<Arc<dyn DomExtractor>>,
     ) -> Self {
         Self {
             primary_llm: primary,
@@ -41,6 +44,7 @@ impl RunStep {
             registry,
             browser,
             events,
+            dom_extractor,
         }
     }
 
@@ -106,6 +110,17 @@ impl RunStep {
             }
         }
 
+        let summary = match (&self.dom_extractor, &target) {
+            (Some(extractor), Some(t)) => match extractor.snapshot(t).await {
+                Ok(s) => Some(s),
+                Err(e) => {
+                    tracing::warn!(error = %e, "dom snapshot failed; continuing without grounding");
+                    None
+                }
+            },
+            _ => None,
+        };
+
         let metadata = StepMetadata {
             duration_ms: started.elapsed().as_millis() as u64,
             step_interval_ms: None,
@@ -120,6 +135,7 @@ impl RunStep {
             output,
             results,
             metadata,
+            summary,
         })
     }
 
