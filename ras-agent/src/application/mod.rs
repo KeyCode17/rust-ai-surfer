@@ -3,6 +3,7 @@ pub mod detect_loop;
 pub mod fallback_llm;
 pub mod parse_output;
 pub mod render_plan;
+pub mod render_step_message;
 pub mod run_agent;
 pub mod run_step;
 pub mod url_shortening;

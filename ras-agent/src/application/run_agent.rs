@@ -7,6 +7,7 @@ use ras_llm::{ChatMessage, LlmClient};
 use ras_tools::domain::registry::ActionRegistry;
 use ras_types::{AgentId, StepId};
 
+use crate::application::render_step_message::render_step_message;
 use crate::application::run_step::RunStep;
 use crate::domain::agent_history::{AgentHistory, AgentHistoryList, StepRecord};
 use crate::domain::loop_detector::ActionLoopDetector;
@@ -126,12 +127,8 @@ fn build_prompt(task: &str, history: &[StepRecord], registry: &ActionRegistry) -
         if let Ok(j) = serde_json::to_string(&step.output) {
             out.push(ChatMessage::assistant_text(j));
         }
-        let summary = render_step_results(step);
-        if !summary.is_empty() {
-            out.push(ChatMessage::user_text(format!(
-                "Step {} results:\n{summary}",
-                step.step.0
-            )));
+        if let Some(msg) = render_step_message(step) {
+            out.push(msg);
         }
     }
     out.push(ChatMessage::user_text(
@@ -160,31 +157,4 @@ fn render_action_catalog(registry: &ActionRegistry) -> String {
         buf.push_str("(no actions registered)\n");
     }
     buf
-}
-
-fn render_step_results(step: &StepRecord) -> String {
-    let mut lines = Vec::new();
-    for (i, r) in step.results.iter().enumerate() {
-        let mut parts = vec![format!("[{i}]")];
-        if r.is_done {
-            parts.push("done".into());
-        }
-        if let Some(err) = &r.error {
-            parts.push(format!("error: {}", truncate(err, 240)));
-        } else if let Some(c) = &r.extracted_content {
-            parts.push(truncate(c, 480));
-        }
-        lines.push(parts.join(" "));
-    }
-    lines.join("\n")
-}
-
-fn truncate(s: &str, max: usize) -> String {
-    if s.chars().count() <= max {
-        s.to_string()
-    } else {
-        let mut out: String = s.chars().take(max).collect();
-        out.push_str("…");
-        out
-    }
 }
