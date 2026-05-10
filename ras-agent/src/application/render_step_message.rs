@@ -82,6 +82,7 @@ mod tests {
             },
             results,
             metadata: StepMetadata::default(),
+            summary: None,
         }
     }
 
