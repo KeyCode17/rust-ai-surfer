@@ -73,6 +73,14 @@ impl ChatMessage {
     }
 
     #[must_use]
+    pub fn user_parts(parts: Vec<ContentPart>) -> Self {
+        Self::User(UserMessage {
+            content: parts,
+            cache: false,
+        })
+    }
+
+    #[must_use]
     pub fn assistant_text(text: impl Into<String>) -> Self {
         Self::Assistant(AssistantMessage {
             content: Some(text.into()),
