@@ -1,6 +1,6 @@
 use chromiumoxide::Page;
 use chromiumoxide::cdp::browser_protocol::dom::{
-    BackendNodeId as CdpBackendNodeId, ResolveNodeParams,
+    BackendNodeId as CdpBackendNodeId, GetDocumentParams, ResolveNodeParams,
 };
 use chromiumoxide::cdp::browser_protocol::input::{DispatchKeyEventParams, DispatchKeyEventType};
 use chromiumoxide::cdp::js_protocol::runtime::CallFunctionOnParams;
@@ -8,6 +8,7 @@ use ras_errors::AppError;
 use ras_types::BackendNodeId;
 
 pub(crate) async fn click_backend_node(page: &Page, node: BackendNodeId) -> Result<(), AppError> {
+    let _ = page.execute(GetDocumentParams::default()).await;
     let resolve = ResolveNodeParams::builder()
         .backend_node_id(CdpBackendNodeId::new(node.0))
         .build();
@@ -23,7 +24,10 @@ pub(crate) async fn click_backend_node(page: &Page, node: BackendNodeId) -> Resu
         .ok_or_else(|| AppError::ActionFailed("resolve_node: no object_id".into()))?;
     let call = CallFunctionOnParams::builder()
         .object_id(object_id)
-        .function_declaration("function() { this.click(); }".to_string())
+        .function_declaration(
+            "function() { if (typeof this.focus === 'function') { this.focus(); } this.click(); }"
+                .to_string(),
+        )
         .build()
         .map_err(|e| AppError::ActionFailed(format!("call_fn params: {e}")))?;
     page.execute(call)

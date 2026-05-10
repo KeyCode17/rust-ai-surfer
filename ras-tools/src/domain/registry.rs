@@ -2,6 +2,7 @@ use std::sync::Arc;
 
 use indexmap::IndexMap;
 use ras_cdp::BrowserPort;
+use ras_dom::ClickableElement;
 use ras_errors::AppError;
 use ras_events::EventBus;
 use ras_types::ActionName;
@@ -15,6 +16,7 @@ pub struct ToolContext {
     pub events: Arc<dyn EventBus>,
     pub page_url: Option<Url>,
     pub available_files: Vec<String>,
+    pub clickables: Arc<Vec<ClickableElement>>,
 }
 
 impl std::fmt::Debug for ToolContext {

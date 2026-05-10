@@ -1535,7 +1535,7 @@ dependencies = [
 
 [[package]]
 name = "ras-agent"
-version = "2.5.3"
+version = "2.6.4"
 dependencies = [
  "async-trait",
  "chrono",
@@ -1567,7 +1567,7 @@ dependencies = [
 
 [[package]]
 name = "ras-browser"
-version = "2.5.3"
+version = "2.6.4"
 dependencies = [
  "async-trait",
  "ras-cdp",
@@ -1585,7 +1585,7 @@ dependencies = [
 
 [[package]]
 name = "ras-cdp"
-version = "2.5.3"
+version = "2.6.4"
 dependencies = [
  "async-trait",
  "chromiumoxide",
@@ -1604,7 +1604,7 @@ dependencies = [
 
 [[package]]
 name = "ras-cosmium"
-version = "2.5.3"
+version = "2.6.4"
 dependencies = [
  "async-trait",
  "ras-cdp",
@@ -1621,7 +1621,7 @@ dependencies = [
 
 [[package]]
 name = "ras-dom"
-version = "2.5.3"
+version = "2.6.4"
 dependencies = [
  "async-trait",
  "chromiumoxide",
@@ -1641,7 +1641,7 @@ dependencies = [
 
 [[package]]
 name = "ras-errors"
-version = "2.5.3"
+version = "2.6.4"
 dependencies = [
  "serde",
  "thiserror 2.0.18",
@@ -1649,7 +1649,7 @@ dependencies = [
 
 [[package]]
 name = "ras-events"
-version = "2.5.3"
+version = "2.6.4"
 dependencies = [
  "async-broadcast",
  "async-trait",
@@ -1679,6 +1679,7 @@ dependencies = [
  "ras-events",
  "ras-llm",
  "ras-llm-anthropic",
+ "ras-llm-openrouter",
  "ras-tools",
  "tokio",
  "tracing",
@@ -1688,7 +1689,7 @@ dependencies = [
 
 [[package]]
 name = "ras-filesystem"
-version = "2.5.3"
+version = "2.6.4"
 dependencies = [
  "async-trait",
  "ras-errors",
@@ -1702,7 +1703,7 @@ dependencies = [
 
 [[package]]
 name = "ras-judge"
-version = "2.5.3"
+version = "2.6.4"
 dependencies = [
  "async-trait",
  "image",
@@ -1717,7 +1718,7 @@ dependencies = [
 
 [[package]]
 name = "ras-llm"
-version = "2.5.3"
+version = "2.6.4"
 dependencies = [
  "async-trait",
  "ras-errors",
@@ -1731,7 +1732,7 @@ dependencies = [
 
 [[package]]
 name = "ras-llm-anthropic"
-version = "2.5.3"
+version = "2.6.4"
 dependencies = [
  "async-trait",
  "chrono",
@@ -1751,8 +1752,43 @@ dependencies = [
 ]
 
 [[package]]
+name = "ras-llm-openai"
+version = "2.6.4"
+dependencies = [
+ "async-trait",
+ "ras-errors",
+ "ras-llm",
+ "ras-types",
+ "reqwest",
+ "serde",
+ "serde_json",
+ "thiserror 2.0.18",
+ "tokio",
+ "tracing",
+ "url",
+]
+
+[[package]]
+name = "ras-llm-openrouter"
+version = "2.6.4"
+dependencies = [
+ "async-trait",
+ "ras-errors",
+ "ras-llm",
+ "ras-llm-openai",
+ "ras-types",
+ "reqwest",
+ "serde",
+ "serde_json",
+ "thiserror 2.0.18",
+ "tokio",
+ "tracing",
+ "url",
+]
+
+[[package]]
 name = "ras-telemetry"
-version = "2.5.3"
+version = "2.6.4"
 dependencies = [
  "async-trait",
  "ras-errors",
@@ -1766,7 +1802,7 @@ dependencies = [
 
 [[package]]
 name = "ras-tokens"
-version = "2.5.3"
+version = "2.6.4"
 dependencies = [
  "async-trait",
  "chrono",
@@ -1784,7 +1820,7 @@ dependencies = [
 
 [[package]]
 name = "ras-tools"
-version = "2.5.3"
+version = "2.6.4"
 dependencies = [
  "async-trait",
  "indexmap",
@@ -1805,7 +1841,7 @@ dependencies = [
 
 [[package]]
 name = "ras-types"
-version = "2.5.3"
+version = "2.6.4"
 dependencies = [
  "chrono",
  "indexmap",
@@ -1821,7 +1857,7 @@ dependencies = [
 
 [[package]]
 name = "ras-watchdogs"
-version = "2.5.3"
+version = "2.6.4"
 dependencies = [
  "async-trait",
  "ras-browser",

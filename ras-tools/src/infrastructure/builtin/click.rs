@@ -1,6 +1,6 @@
 use async_trait::async_trait;
 use ras_errors::AppError;
-use ras_types::{ActionName, ActionResult, ActionTimeout, BackendNodeId};
+use ras_types::{ActionName, ActionResult, ActionTimeout};
 use serde::Deserialize;
 use serde_json::json;
 
@@ -39,9 +39,27 @@ impl ToolHandler for ClickElementAction {
     ) -> Result<ActionResult, AppError> {
         let p: IndexParams = serde_json::from_value(params)
             .map_err(|e| AppError::ValidationError(format!("click params: {e}")))?;
+        let element = ctx
+            .clickables
+            .iter()
+            .find(|c| i64::from(c.index) == p.index)
+            .ok_or_else(|| {
+                AppError::ValidationError(format!(
+                    "no clickable with index {} in current snapshot ({} available)",
+                    p.index,
+                    ctx.clickables.len()
+                ))
+            })?;
+        tracing::debug!(
+            target: "ras_tools::click",
+            list_index = p.index,
+            backend_node_id = ?element.backend_node_id,
+            xpath = %element.xpath,
+            "click_element resolved"
+        );
         let target = ctx.browser.focused_target().await?;
         ctx.browser
-            .click_node(&target, BackendNodeId(p.index))
+            .click_node(&target, element.backend_node_id)
             .await?;
         Ok(ActionResult::ok(format!("clicked element {}", p.index)))
     }
