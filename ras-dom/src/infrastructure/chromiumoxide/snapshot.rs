@@ -96,6 +96,13 @@ async fn list_tabs(browser: &Arc<Mutex<Browser>>) -> Result<Vec<TabInfo>, AppErr
         .collect())
 }
 
+pub(crate) async fn page_for_public(
+    browser: &Arc<Mutex<Browser>>,
+    target: &RasTargetId,
+) -> Result<chromiumoxide::Page, AppError> {
+    page_for(browser, target).await
+}
+
 async fn page_for(
     browser: &Arc<Mutex<Browser>>,
     target: &RasTargetId,
