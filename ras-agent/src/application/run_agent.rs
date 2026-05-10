@@ -1,12 +1,17 @@
 use std::sync::Arc;
 
+use ras_cdp::BrowserPort;
 use ras_errors::AppError;
+use ras_events::EventBus;
 use ras_llm::{ChatMessage, LlmClient};
+use ras_tools::domain::registry::ActionRegistry;
 use ras_types::{AgentId, StepId};
 
 use crate::application::run_step::RunStep;
 use crate::domain::agent_history::{AgentHistory, AgentHistoryList, StepRecord};
 use crate::domain::loop_detector::ActionLoopDetector;
+
+const AGENT_OUTPUT_SHAPE: &str = r#"{"current_state":{"evaluation_previous_goal":"...","memory":"...","next_goal":"..."},"action":[{"name":"<action_name>","parameters":{...}}]}"#;
 
 pub struct RunAgent {
     pub agent: AgentId,
@@ -14,16 +19,28 @@ pub struct RunAgent {
     pub max_steps: u32,
     pub primary_llm: Arc<dyn LlmClient>,
     pub fallback_llm: Option<Arc<dyn LlmClient>>,
+    pub registry: Arc<ActionRegistry>,
+    pub browser: Arc<dyn BrowserPort>,
+    pub events: Arc<dyn EventBus>,
 }
 
 impl RunAgent {
-    pub fn new(task: impl Into<String>, llm: Arc<dyn LlmClient>) -> Self {
+    pub fn new(
+        task: impl Into<String>,
+        llm: Arc<dyn LlmClient>,
+        registry: Arc<ActionRegistry>,
+        browser: Arc<dyn BrowserPort>,
+        events: Arc<dyn EventBus>,
+    ) -> Self {
         Self {
             agent: AgentId::new(),
             task: task.into(),
             max_steps: 25,
             primary_llm: llm,
             fallback_llm: None,
+            registry,
+            browser,
+            events,
         }
     }
 
@@ -40,7 +57,13 @@ impl RunAgent {
     }
 
     pub async fn execute(self) -> Result<AgentHistoryList, AppError> {
-        let runner = RunStep::new(self.primary_llm.clone(), self.fallback_llm.clone());
+        let runner = RunStep::new(
+            self.primary_llm.clone(),
+            self.fallback_llm.clone(),
+            self.registry.clone(),
+            self.browser.clone(),
+            self.events.clone(),
+        );
         let mut detector = ActionLoopDetector::new();
         let mut history = AgentHistory {
             agent: self.agent,
@@ -48,16 +71,32 @@ impl RunAgent {
             steps: Vec::new(),
         };
         let mut last_step_ms: Option<u64> = None;
+        let mut empty_streak: u32 = 0;
         for n in 0..self.max_steps {
-            let prompt = build_prompt(&self.task, &history.steps);
+            let prompt = build_prompt(&self.task, &history.steps, &self.registry);
             let mut record = runner
                 .execute(StepId(n), self.max_steps, prompt, &mut detector)
                 .await?;
             record.metadata.step_interval_ms = last_step_ms;
             last_step_ms = Some(record.metadata.duration_ms);
-            let done = record.results.iter().any(|r| r.is_done) || record.output.action.is_empty();
+
+            let done = record.results.iter().any(|r| r.is_done);
+            if record.output.action.is_empty() {
+                empty_streak += 1;
+                tracing::warn!(
+                    step = n,
+                    "model returned empty action list (streak={empty_streak}); treating as stalled"
+                );
+            } else {
+                empty_streak = 0;
+            }
+
             history.steps.push(record);
             if done {
+                break;
+            }
+            if empty_streak >= 2 {
+                tracing::error!("agent stalled: 2 consecutive empty action lists, aborting");
                 break;
             }
         }
@@ -67,17 +106,85 @@ impl RunAgent {
     }
 }
 
-fn build_prompt(task: &str, history: &[StepRecord]) -> Vec<ChatMessage> {
-    let mut out = vec![ChatMessage::system(format!(
-        "You are a browsing agent. Task: {task}\nReturn JSON with current_state and action[]."
-    ))];
+fn build_prompt(task: &str, history: &[StepRecord], registry: &ActionRegistry) -> Vec<ChatMessage> {
+    let catalog = render_action_catalog(registry);
+    let system = format!(
+        "You are a browsing agent. Your task: {task}\n\n\
+         You drive a real browser via the actions listed below. Each step you must \
+         emit ONE JSON object matching this exact shape (no prose, no markdown fences):\n\
+         {AGENT_OUTPUT_SHAPE}\n\n\
+         Available actions:\n{catalog}\n\n\
+         Rules:\n\
+         - Use only action names from the catalog above. Match parameters_schema exactly.\n\
+         - Plan one or two atomic steps at a time; the runtime executes them in order \
+           and feeds results back on the next turn.\n\
+         - Call the `done` action when the task is complete; pass the final answer in \
+           its parameters. Returning an empty action list is treated as a failure."
+    );
+    let mut out = vec![ChatMessage::system(system)];
     for step in history.iter().rev().take(4).rev() {
         if let Ok(j) = serde_json::to_string(&step.output) {
             out.push(ChatMessage::assistant_text(j));
         }
+        let summary = render_step_results(step);
+        if !summary.is_empty() {
+            out.push(ChatMessage::user_text(format!(
+                "Step {} results:\n{summary}",
+                step.step.0
+            )));
+        }
     }
     out.push(ChatMessage::user_text(
-        "Decide the next action(s). Return JSON {current_state, action: [...]}",
+        "Decide the next action(s). Respond with the JSON object only.",
     ));
     out
+}
+
+fn render_action_catalog(registry: &ActionRegistry) -> String {
+    let mut buf = String::new();
+    for (name, reg) in registry.iter() {
+        let schema =
+            serde_json::to_string(&reg.metadata.parameters_schema).unwrap_or_else(|_| "{}".into());
+        buf.push_str("- ");
+        buf.push_str(&name.0);
+        buf.push_str(": ");
+        buf.push_str(&reg.metadata.description);
+        if reg.metadata.terminates_sequence {
+            buf.push_str(" [terminates step]");
+        }
+        buf.push_str("\n  parameters_schema: ");
+        buf.push_str(&schema);
+        buf.push('\n');
+    }
+    if buf.is_empty() {
+        buf.push_str("(no actions registered)\n");
+    }
+    buf
+}
+
+fn render_step_results(step: &StepRecord) -> String {
+    let mut lines = Vec::new();
+    for (i, r) in step.results.iter().enumerate() {
+        let mut parts = vec![format!("[{i}]")];
+        if r.is_done {
+            parts.push("done".into());
+        }
+        if let Some(err) = &r.error {
+            parts.push(format!("error: {}", truncate(err, 240)));
+        } else if let Some(c) = &r.extracted_content {
+            parts.push(truncate(c, 480));
+        }
+        lines.push(parts.join(" "));
+    }
+    lines.join("\n")
+}
+
+fn truncate(s: &str, max: usize) -> String {
+    if s.chars().count() <= max {
+        s.to_string()
+    } else {
+        let mut out: String = s.chars().take(max).collect();
+        out.push_str("…");
+        out
+    }
 }

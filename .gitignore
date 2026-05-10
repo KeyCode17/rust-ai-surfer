@@ -12,3 +12,4 @@ target/
 .direnv/
 result
 .cargo-cache/
+.don't-push/
