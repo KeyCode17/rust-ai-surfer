@@ -13,8 +13,8 @@ use url::Url;
 use crate::application::compute_action_hash::compute_action_hash;
 use crate::application::detect_loop::{build_budget_warning, build_loop_nudge};
 use crate::application::fallback_llm::should_switch_to_fallback;
+use crate::application::parse_output::parse_agent_output;
 use crate::domain::agent_history::StepRecord;
-use crate::domain::agent_output::{ActionInvocation, AgentBrain, AgentOutput};
 use crate::domain::loop_detector::ActionLoopDetector;
 use crate::domain::step_metadata::StepMetadata;
 
@@ -141,34 +141,6 @@ impl RunStep {
             Err(e) => Err(e),
         }
     }
-}
-
-fn parse_agent_output(response: &ChatResponse) -> Result<AgentOutput, AppError> {
-    if let Some(content) = &response.content {
-        if let Ok(parsed) = serde_json::from_str::<AgentOutput>(content) {
-            return Ok(parsed);
-        }
-    }
-    Ok(AgentOutput {
-        current_state: AgentBrain {
-            evaluation_previous_goal: String::new(),
-            memory: String::new(),
-            next_goal: response.content.clone().unwrap_or_default(),
-        },
-        action: tool_calls_to_actions(&response.tool_calls),
-        plan: None,
-        current_plan_item: None,
-    })
-}
-
-fn tool_calls_to_actions(calls: &[ras_llm::ToolCall]) -> Vec<ActionInvocation> {
-    calls
-        .iter()
-        .map(|c| ActionInvocation {
-            name: ras_types::ActionName(c.name.clone().into()),
-            parameters: c.arguments.clone(),
-        })
-        .collect()
 }
 
 #[must_use]

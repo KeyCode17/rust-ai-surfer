@@ -194,3 +194,38 @@ async fn agent_aborts_after_consecutive_empty_actions() {
         "agent should bail after 2 empty streaks, ran {total} steps"
     );
 }
+
+#[tokio::test]
+async fn agent_recovers_from_markdown_fenced_response() {
+    let mut registry = ActionRegistry::new();
+    register_default_actions(&mut registry).expect("test invariant");
+    let registry = Arc::new(registry);
+
+    let browser = Arc::new(MockBrowser::default());
+    let browser_port: Arc<dyn BrowserPort> = browser.clone();
+    let events: Arc<dyn EventBus> = Arc::new(BroadcastBus::new(16));
+
+    let fenced_step1 = "```json\n{\"current_state\":{\"evaluation_previous_goal\":\"\",\"memory\":\"\",\"next_goal\":\"go\"},\"action\":[{\"name\":\"navigate\",\"parameters\":{\"url\":\"https://example.com/\"}}]}\n```";
+    let plain_step2 = r#"{"current_state":{"evaluation_previous_goal":"navigated","memory":"","next_goal":"finish"},"action":[{"name":"done","parameters":{"text":"Done."}}]}"#;
+    let llm: Arc<dyn LlmClient> = Arc::new(ScriptedLlm::new(vec![fenced_step1, plain_step2]));
+
+    let history = RunAgent::new("fenced task", llm, registry, browser_port, events)
+        .with_max_steps(5)
+        .execute()
+        .await
+        .expect("agent run");
+
+    let first_step = history
+        .histories
+        .first()
+        .and_then(|h| h.steps.first())
+        .expect("at least one step");
+    assert!(
+        !first_step.output.action.is_empty(),
+        "fenced JSON must parse into a non-empty action list"
+    );
+
+    let navs = browser.navigations.lock().expect("test invariant").clone();
+    assert_eq!(navs.len(), 1, "navigate should reach browser through fence");
+    assert_eq!(navs[0].as_str(), "https://example.com/");
+}
