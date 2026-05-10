@@ -1,11 +1,21 @@
 use ras_types::ActionName;
-use serde::{Deserialize, Serialize};
+use serde::{Deserialize, Deserializer, Serialize};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct AgentBrain {
+    #[serde(default, deserialize_with = "null_to_empty")]
     pub evaluation_previous_goal: String,
+    #[serde(default, deserialize_with = "null_to_empty")]
     pub memory: String,
+    #[serde(default, deserialize_with = "null_to_empty")]
     pub next_goal: String,
+}
+
+fn null_to_empty<'de, D>(de: D) -> Result<String, D::Error>
+where
+    D: Deserializer<'de>,
+{
+    Ok(Option::<String>::deserialize(de)?.unwrap_or_default())
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]

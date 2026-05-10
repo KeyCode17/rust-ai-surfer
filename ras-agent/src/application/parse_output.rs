@@ -129,4 +129,27 @@ mod tests {
         let out = parse_agent_output(&resp("totally not json")).expect("parse");
         assert!(out.action.is_empty());
     }
+
+    #[test]
+    fn null_brain_fields_parse_as_empty_strings() {
+        let body = r#"{"current_state":{"evaluation_previous_goal":null,"memory":null,"next_goal":"go"},"action":[{"name":"navigate","parameters":{"url":"https://example.com/"}}]}"#;
+        let out = parse_agent_output(&resp(body)).expect("parse");
+        assert_eq!(
+            out.action.len(),
+            1,
+            "action should not be lost to null brain fields"
+        );
+        assert_eq!(out.current_state.evaluation_previous_goal, "");
+        assert_eq!(out.current_state.memory, "");
+        assert_eq!(out.current_state.next_goal, "go");
+    }
+
+    #[test]
+    fn missing_brain_fields_default_to_empty() {
+        let body = r#"{"current_state":{"next_goal":"go"},"action":[{"name":"navigate","parameters":{"url":"https://example.com/"}}]}"#;
+        let out = parse_agent_output(&resp(body)).expect("parse");
+        assert_eq!(out.action.len(), 1);
+        assert_eq!(out.current_state.evaluation_previous_goal, "");
+        assert_eq!(out.current_state.memory, "");
+    }
 }
