@@ -19,13 +19,12 @@ pub(crate) async fn capture_with_overlay(
     options: &HighlightOptions,
     request_timeout: Duration,
 ) -> Result<Vec<u8>, AppError> {
-    let result = timeout(
+    timeout(
         request_timeout,
         capture_with_overlay_inner(browser, target, options),
     )
     .await
-    .map_err(|_| AppError::ActionFailed("highlight timed out".into()))?;
-    result
+    .map_err(|_| AppError::ActionFailed("highlight timed out".into()))?
 }
 
 async fn capture_with_overlay_inner(

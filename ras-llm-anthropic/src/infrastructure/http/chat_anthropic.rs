@@ -90,10 +90,10 @@ impl LlmClient for ChatAnthropic {
             if let Ok(val) = HeaderValue::from_str(&format!("Bearer {token}")) {
                 headers.insert(reqwest::header::AUTHORIZATION, val);
             }
-        } else if let Some(key) = &self.api_key {
-            if let Ok(val) = HeaderValue::from_str(key) {
-                headers.insert(HeaderName::from_static("x-api-key"), val);
-            }
+        } else if let Some(key) = &self.api_key
+            && let Ok(val) = HeaderValue::from_str(key)
+        {
+            headers.insert(HeaderName::from_static("x-api-key"), val);
         }
         debug!(url = %url, model = %self.model, "anthropic post");
         let resp = self

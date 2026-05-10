@@ -76,8 +76,8 @@ fn extract_clickables(
     let attrs = nodes.attributes.as_ref();
     let mut out = Vec::new();
     let mut clickable_index: u32 = 0;
-    for i in 0..node_names.len() {
-        let tag_lower = lookup_index(strings, *node_names[i].inner()).to_lowercase();
+    for (i, name) in node_names.iter().enumerate() {
+        let tag_lower = lookup_index(strings, *name.inner()).to_lowercase();
         let empty: Vec<StringIndex> = Vec::new();
         let attr_idxs: &[StringIndex] = attrs
             .and_then(|a| a.get(i))
@@ -147,10 +147,10 @@ fn is_clickable(tag: &str, attrs: &[(String, String)]) -> bool {
 
 fn derive_ax_name(attrs: &[(String, String)]) -> Option<String> {
     for key in ["aria-label", "alt", "title", "name", "placeholder"] {
-        if let Some(v) = attrs.iter().find(|(k, _)| k == key) {
-            if !v.1.is_empty() {
-                return Some(v.1.clone());
-            }
+        if let Some(v) = attrs.iter().find(|(k, _)| k == key)
+            && !v.1.is_empty()
+        {
+            return Some(v.1.clone());
         }
     }
     None
