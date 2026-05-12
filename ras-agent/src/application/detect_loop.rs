@@ -29,11 +29,10 @@ pub fn build_budget_warning(step: u32, max_steps: u32) -> Option<ChatMessage> {
         return None;
     }
     let pct = (step * 100) / max_steps.max(1);
-    if pct < 75 {
+    if pct < 95 {
         return None;
     }
-    let bound = if pct < 90 { 75 } else { 90 };
     Some(ChatMessage::system(format!(
-        "You are at {pct}% of your step budget (>= {bound}%). Wrap up: call done if you have an answer, or pivot decisively."
+        "You are at {pct}% of your step budget. Wrap up: call done if you have an answer, or pivot decisively."
     )))
 }

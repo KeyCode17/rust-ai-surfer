@@ -25,31 +25,20 @@ fn nudge_triggers_at_five_repetitions() {
 }
 
 #[test]
-fn budget_warning_at_75_percent() {
-    let n = build_budget_warning(8, 10).expect("warning");
+fn budget_warning_at_95_percent() {
+    let n = build_budget_warning(95, 100).expect("warning");
     match n {
         ChatMessage::System(m) => {
-            assert!(m.content.contains("80%"));
-            assert!(m.content.contains(">= 75%"));
+            assert!(m.content.contains("95%"));
+            assert!(m.content.contains("Wrap up"));
         }
         _ => panic!("expected system"),
     }
 }
 
 #[test]
-fn budget_warning_escalates_at_90_percent() {
-    let n = build_budget_warning(9, 10).expect("warning");
-    match n {
-        ChatMessage::System(m) => {
-            assert!(m.content.contains("90%"));
-            assert!(m.content.contains(">= 90%"));
-        }
-        _ => panic!("expected system"),
-    }
-}
-
-#[test]
-fn no_budget_warning_under_75_percent() {
-    assert!(build_budget_warning(5, 10).is_none());
-    assert!(build_budget_warning(7, 10).is_none());
+fn no_budget_warning_under_95_percent() {
+    assert!(build_budget_warning(70, 100).is_none());
+    assert!(build_budget_warning(90, 100).is_none());
+    assert!(build_budget_warning(94, 100).is_none());
 }
