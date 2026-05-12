@@ -3,7 +3,8 @@
 [![ci](https://github.com/KeyCode17/rust-ai-surfer/actions/workflows/ci.yml/badge.svg?branch=develop)](https://github.com/KeyCode17/rust-ai-surfer/actions/workflows/ci.yml)
 [![release](https://img.shields.io/github/v/release/KeyCode17/rust-ai-surfer)](https://github.com/KeyCode17/rust-ai-surfer/releases/latest)
 [![license](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
-[![rust](https://img.shields.io/badge/rust-1.85-orange)](rust-toolchain.toml)
+[![rust](https://img.shields.io/badge/rust-1.95-orange)](rust-toolchain.toml)
+[![crates.io](https://img.shields.io/crates/v/ras-cli)](https://crates.io/crates/ras-cli)
 
 Rust port of [browser-use](https://github.com/browser-use/browser-use), driven by [Claude Code OAuth](https://github.com/anthropics/claude-code) and [Cosmium](https://github.com/maulanasdqn/cosmium) (patched Chromium for stealth scraping inside containers).
 
@@ -13,8 +14,9 @@ Rust port of [browser-use](https://github.com/browser-use/browser-use), driven b
 - **BrowserSession over CDP** via [chromiumoxide](https://crates.io/crates/chromiumoxide) with per-request timeout decorator
 - **Cosmium binary launcher** — fingerprint profile JSON → `--cosmium-*` switch mapping, free-port discovery, tempdir for `--user-data-dir`, ready-poll on `/json/version`; also dual `Attach` mode for an externally launched Chromium
 - **★ ChatAnthropicClaudeCode** — 4-tier OAuth credential chain (env API-key bail → macOS Keychain → `~/.claude/.credentials.json` → `~/.claude/settings.json`), `cc_version` resolution from `claude --version`, byte-parity billing header injection
-- **Tools registry** — 8 built-ins (navigate, click_element, click_coordinate, type_text, scroll, screenshot, wait, done), `terminates_sequence` flag, domain filter, per-action timeout
+- **Tools registry** — 8 built-ins (navigate, click_element, click_coordinate, type_text, scroll, screenshot, wait, done), `terminates_sequence` flag, domain filter, per-action timeout. Click + type now drive real CDP input events (Input.dispatchMouseEvent / Input.insertText)
 - **DOM extraction primitives** — dynamic class filter, stable hash (Sha256 of parent xpath + tag + id + role + filtered classes + ax_name), paint-order rect union, skeleton-page detector
+- **DOM grounding** — `ChromiumoxideDomExtractor` captures a per-step snapshot, the agent gets a numbered clickable map injected into the prompt, and `click_element(list_index)` resolves to a `BackendNodeId` before dispatch
 - **Watchdogs** — security (allowed/prohibited domains + IPv4/IPv6 block), popups, crash, downloads — backed by an `async-broadcast` event bus
 - **Multi-provider LLMs** — Anthropic + Claude Code OAuth, OpenAI + Azure, Google, Groq, Bedrock, OpenRouter, Vercel, DeepSeek, Cerebras, Mistral, Ollama, OCI, Cloud, LangChain (OpenAI-compatible providers re-export `ChatOpenAICompatible`)
 - **FileSystem** — `BaseFile` per type, RFC 4180 CSV normalize, regex-validated filenames, tokio::fs-backed `LocalFileSystem`
@@ -59,13 +61,13 @@ rust-ai-surfer/
 └── scripts/                      lefthook helpers
 ```
 
-41 workspace members (37 lib + 2 bin + xtask + examples). 50+ unit/integration tests pass.
+39 workspace members (36 lib + 2 bin + xtask; `examples/` is a separate cargo manifest). 50+ unit/integration tests pass under `-D warnings` clippy.
 
 ## Quick start
 
 Pre-requisites:
 
-- Rust 1.85 (auto-installed on first cargo invocation via `rust-toolchain.toml`)
+- Rust 1.95 (auto-installed on first cargo invocation via `rust-toolchain.toml`)
 - `claude` CLI logged in (for the OAuth path)
 - A Chromium-family binary (the cosmium binary or any plain Chromium for testing)
 
@@ -155,7 +157,7 @@ ADRs live in [`docs/adr/`](docs/adr/):
 
 ## Porting status
 
-This is a feature-for-feature port of [browser-use](https://github.com/browser-use/browser-use) shipped across 11 phases. The end-to-end OAuth + cosmium path is the verified main course. See [`docs/porting-from-browser-use.md`](docs/porting-from-browser-use.md) for the phase-by-phase map and the naming map between the Python source and the Rust crate layout.
+Feature-for-feature port of [browser-use](https://github.com/browser-use/browser-use) shipped across 11 phases (`0.1.0` → `1.0.0`). The `2.x` line is the post-port stable surface: crates published to crates.io, Rust 1.95 pinned, DOM grounding + real CDP input events landed. The end-to-end OAuth + cosmium path is the verified main course. See [`docs/porting-from-browser-use.md`](docs/porting-from-browser-use.md) for the phase-by-phase map and the naming map between the Python source and the Rust crate layout.
 
 ## License
 
