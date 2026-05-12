@@ -15,6 +15,8 @@ struct Params {
     text: String,
     #[serde(default)]
     sensitive: bool,
+    #[serde(default, alias = "H_index", alias = "element_index")]
+    index: Option<i64>,
 }
 
 #[async_trait]
@@ -22,12 +24,13 @@ impl ToolHandler for TypeTextAction {
     fn metadata(&self) -> ActionMetadata {
         ActionMetadata {
             name: ActionName("type_text".into()),
-            description: "Type text into the focused element.".into(),
+            description: "Type text into an input. If `index` is given, focus that clickable first; otherwise type into the currently focused element.".into(),
             parameters_schema: json!({
                 "type": "object",
                 "properties": {
                     "text": {"type": "string"},
-                    "sensitive": {"type": "boolean", "default": false}
+                    "sensitive": {"type": "boolean", "default": false},
+                    "index": {"type": "integer", "description": "Clickable index to focus before typing."}
                 },
                 "required": ["text"]
             }),
@@ -45,6 +48,28 @@ impl ToolHandler for TypeTextAction {
         let p: Params = serde_json::from_value(params)
             .map_err(|e| AppError::ValidationError(format!("type params: {e}")))?;
         let target = ctx.browser.focused_target().await?;
+        if let Some(idx) = p.index {
+            let element = ctx
+                .clickables
+                .iter()
+                .find(|c| i64::from(c.index) == idx)
+                .ok_or_else(|| {
+                    AppError::ValidationError(format!(
+                        "no clickable with index {} in current snapshot ({} available)",
+                        idx,
+                        ctx.clickables.len()
+                    ))
+                })?;
+            tracing::debug!(
+                target: "ras_tools::type_text",
+                list_index = idx,
+                backend_node_id = ?element.backend_node_id,
+                "type_text focusing element before typing"
+            );
+            ctx.browser
+                .click_node(&target, element.backend_node_id)
+                .await?;
+        }
         ctx.browser.type_text(&target, &p.text).await?;
         let display = if p.sensitive {
             "[redacted]".to_string()
