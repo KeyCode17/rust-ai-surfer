@@ -19,10 +19,9 @@ pub(crate) async fn capture_snapshot(
     target: &RasTargetId,
     request_timeout: Duration,
 ) -> Result<BrowserStateSummary, AppError> {
-    let result = timeout(request_timeout, capture_snapshot_inner(browser, target))
+    timeout(request_timeout, capture_snapshot_inner(browser, target))
         .await
-        .map_err(|_| AppError::ActionFailed("snapshot timed out".into()))?;
-    result
+        .map_err(|_| AppError::ActionFailed("snapshot timed out".into()))?
 }
 
 async fn capture_snapshot_inner(

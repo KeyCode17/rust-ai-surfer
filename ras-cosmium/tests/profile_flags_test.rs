@@ -15,8 +15,10 @@ fn default_profile_emits_expected_flags() {
 
 #[test]
 fn user_agent_passes_through() {
-    let mut p = CosmiumProfile::default();
-    p.user_agent = Some("Mozilla/5.0 test".into());
+    let p = CosmiumProfile {
+        user_agent: Some("Mozilla/5.0 test".into()),
+        ..CosmiumProfile::default()
+    };
     let flags = p.to_cli_flags();
     assert!(flags.iter().any(|f| f == "--user-agent=Mozilla/5.0 test"));
 }

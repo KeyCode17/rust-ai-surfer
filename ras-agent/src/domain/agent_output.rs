@@ -15,7 +15,13 @@ fn null_to_empty<'de, D>(de: D) -> Result<String, D::Error>
 where
     D: Deserializer<'de>,
 {
-    Ok(Option::<String>::deserialize(de)?.unwrap_or_default())
+    use serde_json::Value;
+    let v = Value::deserialize(de)?;
+    Ok(match v {
+        Value::Null => String::new(),
+        Value::String(s) => s,
+        other => other.to_string(),
+    })
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]

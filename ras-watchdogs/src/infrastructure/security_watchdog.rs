@@ -72,10 +72,10 @@ impl Watchdog for SecurityWatchdog {
                 tokio::select! {
                     _ = task_cancel.cancelled() => break,
                     ev = rx.recv() => match ev {
-                        Ok(BrowserEvent::NavigationStarted { url, .. }) => {
-                            if !inner.permits(&url) {
-                                warn!(%url, "navigation blocked by SecurityWatchdog");
-                            }
+                        Ok(BrowserEvent::NavigationStarted { url, .. })
+                            if !inner.permits(&url) =>
+                        {
+                            warn!(%url, "navigation blocked by SecurityWatchdog");
                         }
                         Err(_) => break,
                         _ => {}
