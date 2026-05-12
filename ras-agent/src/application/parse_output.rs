@@ -145,6 +145,18 @@ mod tests {
     }
 
     #[test]
+    fn non_string_brain_fields_coerce_to_string() {
+        let body = r#"{"current_state":{"evaluation_previous_goal":"ok","memory":[],"next_goal":"go"},"action":[{"name":"navigate","parameters":{"url":"https://example.com/"}}]}"#;
+        let out = parse_agent_output(&resp(body)).expect("parse");
+        assert_eq!(
+            out.action.len(),
+            1,
+            "action should not be lost to non-string memory field"
+        );
+        assert_eq!(out.current_state.memory, "[]");
+    }
+
+    #[test]
     fn missing_brain_fields_default_to_empty() {
         let body = r#"{"current_state":{"next_goal":"go"},"action":[{"name":"navigate","parameters":{"url":"https://example.com/"}}]}"#;
         let out = parse_agent_output(&resp(body)).expect("parse");
