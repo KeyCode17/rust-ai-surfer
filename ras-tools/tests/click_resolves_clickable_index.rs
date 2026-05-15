@@ -44,6 +44,24 @@ impl BrowserPort for CaptureBrowser {
         self.clicked.lock().expect("lock").push(n);
         Ok(())
     }
+    async fn mouse_down(&self, _t: &TargetId, _x: i32, _y: i32) -> Result<(), AppError> {
+        unimplemented!()
+    }
+    async fn mouse_up(&self, _t: &TargetId, _x: i32, _y: i32) -> Result<(), AppError> {
+        unimplemented!()
+    }
+    async fn mouse_hold(&self, _t: &TargetId, _x: i32, _y: i32, _ms: u64) -> Result<(), AppError> {
+        unimplemented!()
+    }
+    async fn mouse_move(&self, _t: &TargetId, _x: i32, _y: i32, _b: i64) -> Result<(), AppError> {
+        unimplemented!()
+    }
+    async fn block_urls(&self, _t: &TargetId, _patterns: Vec<String>) -> Result<(), AppError> {
+        unimplemented!()
+    }
+    async fn clear_cookies(&self, _t: &TargetId, _origin: &str) -> Result<(), AppError> {
+        unimplemented!()
+    }
     async fn type_text(&self, _t: &TargetId, _s: &str) -> Result<(), AppError> {
         unimplemented!()
     }

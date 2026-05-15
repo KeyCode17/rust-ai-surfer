@@ -1,6 +1,7 @@
 pub mod click;
 pub mod done;
 pub mod navigate;
+pub mod press_and_hold;
 pub mod register;
 pub mod screenshot;
 pub mod scroll;

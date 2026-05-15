@@ -2,14 +2,16 @@ use ras_tools::{ActionRegistry, register_default_actions};
 use ras_types::ActionName;
 
 #[test]
-fn default_set_registers_eight_actions() {
+fn default_set_registers_ten_actions() {
     let mut r = ActionRegistry::new();
     register_default_actions(&mut r).expect("register");
-    assert_eq!(r.len(), 8);
+    assert_eq!(r.len(), 10);
     for name in [
         "navigate",
         "click_element",
         "click_coordinate",
+        "press_and_hold_element",
+        "press_and_hold_coordinate",
         "type_text",
         "scroll",
         "screenshot",
@@ -34,7 +36,7 @@ fn exclude_removes_action() {
     register_default_actions(&mut r).expect("register");
     let n = ActionName("done".into());
     r.exclude(&n);
-    assert_eq!(r.len(), 7);
+    assert_eq!(r.len(), 9);
     assert!(r.get(&n).is_none());
 }
 

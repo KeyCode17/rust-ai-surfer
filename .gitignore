@@ -13,3 +13,4 @@ target/
 result
 .cargo-cache/
 .don't-push/
+graphify-out/
