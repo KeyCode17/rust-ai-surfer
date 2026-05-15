@@ -8,8 +8,9 @@ for f in "$@"; do
         *) continue ;;
     esac
     case "$f" in
-        */tests/*) continue ;;
-        */examples/*) continue ;;
+        */tests/*|tests/*) continue ;;
+        */examples/*|examples/*) continue ;;
+        */xtask/*|xtask/*) continue ;;
     esac
     [ -f "$f" ] || continue
     lines=$(wc -l < "$f")

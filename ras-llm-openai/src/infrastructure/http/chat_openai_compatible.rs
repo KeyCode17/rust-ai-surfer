@@ -3,7 +3,7 @@ use ras_errors::AppError;
 use ras_llm::{ChatMessage, ChatResponse, InvokeOptions, LlmClient, ProviderName};
 use reqwest::Client;
 use reqwest::header::{HeaderMap, HeaderName, HeaderValue};
-use tracing::debug;
+use tracing::{debug, trace};
 
 use crate::infrastructure::http::dto::{
     ChatCompletionResponse, ChatRequest, response_to_chat, to_dto_messages,
@@ -106,6 +106,12 @@ impl LlmClient for ChatOpenAICompatible {
             }
         }
         debug!(provider = %self.provider, model = %self.model, "chat post");
+        if tracing::enabled!(tracing::Level::TRACE) {
+            match serde_json::to_string(&req) {
+                Ok(s) => trace!(provider = %self.provider, body = %s, "llm request"),
+                Err(e) => trace!(provider = %self.provider, err = %e, "llm request serialize"),
+            }
+        }
         let resp = self
             .client
             .post(&url)
@@ -119,6 +125,9 @@ impl LlmClient for ChatOpenAICompatible {
             .text()
             .await
             .map_err(|e| AppError::LlmProviderError(format!("{} body: {e}", self.provider)))?;
+        if tracing::enabled!(tracing::Level::TRACE) {
+            trace!(provider = %self.provider, status = %status, body = %body, "llm response");
+        }
         if !status.is_success() {
             return Err(map_status(status, &body));
         }

@@ -6,6 +6,9 @@ use crate::domain::registry::ActionRegistry;
 use crate::infrastructure::builtin::click::{ClickCoordinateAction, ClickElementAction};
 use crate::infrastructure::builtin::done::DoneAction;
 use crate::infrastructure::builtin::navigate::NavigateAction;
+use crate::infrastructure::builtin::press_and_hold::{
+    PressAndHoldCoordinateAction, PressAndHoldElementAction,
+};
 use crate::infrastructure::builtin::screenshot::ScreenshotAction;
 use crate::infrastructure::builtin::scroll::ScrollAction;
 use crate::infrastructure::builtin::type_text::TypeTextAction;
@@ -15,6 +18,8 @@ pub fn register_default_actions(registry: &mut ActionRegistry) -> Result<(), App
     registry.register(Arc::new(NavigateAction))?;
     registry.register(Arc::new(ClickElementAction))?;
     registry.register(Arc::new(ClickCoordinateAction))?;
+    registry.register(Arc::new(PressAndHoldElementAction))?;
+    registry.register(Arc::new(PressAndHoldCoordinateAction))?;
     registry.register(Arc::new(TypeTextAction))?;
     registry.register(Arc::new(ScrollAction))?;
     registry.register(Arc::new(ScreenshotAction))?;
