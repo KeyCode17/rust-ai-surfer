@@ -7,9 +7,9 @@ for f in "$@"; do
         *) continue ;;
     esac
     case "$f" in
-        */tests/*) continue ;;
-        */examples/*) continue ;;
-        */xtask/*) continue ;;
+        */tests/*|tests/*) continue ;;
+        */examples/*|examples/*) continue ;;
+        */xtask/*|xtask/*) continue ;;
     esac
     [ -f "$f" ] || continue
     if grep -nE '^[[:space:]]*(//[^/!]|/\*)' "$f" >/dev/null 2>&1; then

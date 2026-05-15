@@ -14,8 +14,25 @@ path = "claude_code_oauth_cosmium.rs"
 name = "youtube_search_smoke"
 path = "youtube_search_smoke.rs"
 
+[[example]]
+name = "youtube_search_claude_code"
+path = "youtube_search_claude_code.rs"
+
+[[example]]
+name = "pedidosya_perimeterx_smoke"
+path = "pedidosya_perimeterx_smoke.rs"
+
+[[example]]
+name = "mouse_drag_smoke"
+path = "mouse_drag_smoke.rs"
+
+[[example]]
+name = "pedidosya_px_solver"
+path = "pedidosya_px_solver.rs"
+
 [dependencies]
 anyhow             = "1"
+serde_json         = "1"
 tokio              = { version = "1", features = ["full"] }
 tracing            = "0.1"
 tracing-subscriber = { version = "0.3", features = ["env-filter", "fmt"] }
@@ -31,3 +48,4 @@ ras-llm            = { path = "../ras-llm" }
 ras-llm-anthropic  = { path = "../ras-llm-anthropic", features = ["claude-code"] }
 ras-llm-openrouter = { path = "../ras-llm-openrouter" }
 ras-tools          = { path = "../ras-tools" }
+ras-types          = { path = "../ras-types" }
