@@ -63,6 +63,24 @@ impl BrowserPort for MockBrowser {
     async fn click_node(&self, _t: &TargetId, _n: BackendNodeId) -> Result<(), AppError> {
         Ok(())
     }
+    async fn mouse_down(&self, _t: &TargetId, _x: i32, _y: i32) -> Result<(), AppError> {
+        Ok(())
+    }
+    async fn mouse_up(&self, _t: &TargetId, _x: i32, _y: i32) -> Result<(), AppError> {
+        Ok(())
+    }
+    async fn mouse_hold(&self, _t: &TargetId, _x: i32, _y: i32, _ms: u64) -> Result<(), AppError> {
+        Ok(())
+    }
+    async fn mouse_move(&self, _t: &TargetId, _x: i32, _y: i32, _b: i64) -> Result<(), AppError> {
+        Ok(())
+    }
+    async fn block_urls(&self, _t: &TargetId, _patterns: Vec<String>) -> Result<(), AppError> {
+        Ok(())
+    }
+    async fn clear_cookies(&self, _t: &TargetId, _origin: &str) -> Result<(), AppError> {
+        Ok(())
+    }
     async fn type_text(&self, _t: &TargetId, _text: &str) -> Result<(), AppError> {
         Ok(())
     }
