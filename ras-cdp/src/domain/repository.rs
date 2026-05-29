@@ -1,6 +1,6 @@
 use async_trait::async_trait;
 use ras_errors::AppError;
-use ras_types::{BackendNodeId, TargetId};
+use ras_types::{BackendNodeId, ContextId, TargetId};
 use serde::{Deserialize, Serialize};
 use url::Url;
 
@@ -64,4 +64,32 @@ pub trait BrowserPort: Send + Sync + 'static {
     async fn clear_cookies(&self, target: &TargetId, origin: &str) -> Result<(), AppError>;
     async fn close_target(&self, target: &TargetId) -> Result<(), AppError>;
     async fn create_target(&self, url: &Url) -> Result<TargetId, AppError>;
+
+    /// Create a fresh isolated browser context (separate cookies/storage).
+    async fn create_context(&self) -> Result<ContextId, AppError> {
+        Err(AppError::ActionFailed(
+            "create_context not supported by this BrowserPort".into(),
+        ))
+    }
+
+    /// Dispose a context, freeing its cookies/storage/tabs.
+    async fn close_context(&self, _ctx: &ContextId) -> Result<(), AppError> {
+        Err(AppError::ActionFailed(
+            "close_context not supported by this BrowserPort".into(),
+        ))
+    }
+
+    /// Open a new tab inside a specific context.
+    async fn new_target_in(&self, _ctx: &ContextId, _url: &Url) -> Result<TargetId, AppError> {
+        Err(AppError::ActionFailed(
+            "new_target_in not supported by this BrowserPort".into(),
+        ))
+    }
+
+    /// List only the tabs belonging to a specific context.
+    async fn list_targets_in(&self, _ctx: &ContextId) -> Result<Vec<TargetId>, AppError> {
+        Err(AppError::ActionFailed(
+            "list_targets_in not supported by this BrowserPort".into(),
+        ))
+    }
 }
