@@ -1,14 +1,18 @@
-use ras_dom::BrowserStateSummary;
+use ras_dom::{BrowserStateSummary, ClickableElement};
 
-const CLICKABLE_LIMIT: usize = 80;
+const CLICKABLE_LIMIT: usize = 200;
 const NAME_BUDGET: usize = 80;
 
 pub(crate) fn render_clickable_map(summary: &BrowserStateSummary) -> String {
     if summary.clickables.is_empty() {
         return String::new();
     }
+    let mut ordered: Vec<&_> = summary.clickables.iter().collect();
+    let visible = |c: &&ClickableElement| c.bbox.width > 0.0 && c.bbox.height > 0.0;
+    ordered.sort_by_key(|c| !visible(c));
+
     let mut buf = String::from("clickable_elements:\n");
-    for c in summary.clickables.iter().take(CLICKABLE_LIMIT) {
+    for c in ordered.iter().take(CLICKABLE_LIMIT) {
         buf.push_str(&format!("  [{}] {}", c.index, c.tag));
         if let Some(name) = &c.ax_name {
             buf.push_str(&format!(" \"{}\"", truncate(name, NAME_BUDGET)));
@@ -99,6 +103,24 @@ mod tests {
         let out = render_clickable_map(&s);
         assert!(out.contains("[0] a\n"));
         assert!(!out.contains('"'));
+    }
+
+    #[test]
+    fn visible_elements_survive_truncation_over_hidden() {
+        let mut many: Vec<ClickableElement> = (0..(CLICKABLE_LIMIT as u32))
+            .map(|i| click(i, "div", None, None))
+            .collect();
+        for c in &mut many {
+            c.bbox.width = 0.0;
+            c.bbox.height = 0.0;
+        }
+        let mut visible = click(999, "button", Some("Save"), None);
+        visible.bbox.width = 10.0;
+        visible.bbox.height = 10.0;
+        many.push(visible);
+        let out = render_clickable_map(&summary_with(many));
+        assert!(out.contains("[999] button \"Save\""));
+        assert!(out.contains("…and 1 more (truncated)"));
     }
 
     #[test]
