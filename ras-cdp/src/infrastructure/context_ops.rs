@@ -56,7 +56,6 @@ pub(crate) async fn new_target_in(
     Ok(TargetId(page.target_id().as_ref().into()))
 }
 
-#[allow(dead_code)]
 pub(crate) async fn list_targets_in(
     browser: &Arc<Mutex<Browser>>,
     ctx: &ContextId,
