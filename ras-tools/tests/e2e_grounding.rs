@@ -107,3 +107,65 @@ async fn click_and_type_resolve_through_clickable_map() {
         "button click must trigger onclick (got {title:?})"
     );
 }
+
+/// Live check that the clickable map names elements from descendant text, onclick handlers,
+/// and FontAwesome icon classes, and that `role` overrides the displayed tag.
+#[tokio::test]
+#[ignore]
+async fn clickable_names_resolve_text_onclick_icon_and_role() {
+    let url = cdp_url().expect(SETUP_HINT);
+    let adapter = ChromiumoxideAdapter::connect(url, Duration::from_secs(30))
+        .await
+        .expect("connect");
+    let browser_arc = adapter.browser_arc();
+    let browser: Arc<dyn BrowserPort> = Arc::new(adapter);
+    let extractor: Arc<dyn DomExtractor> = Arc::new(ChromiumoxideDomExtractor::new(
+        browser_arc,
+        Duration::from_secs(30),
+    ));
+
+    let html = concat!(
+        "data:text/html,",
+        "<ul>",
+        "<li><a href='/private/dashboard-statistic'>Dashboard</a></li>",
+        "<li><a href='/sub'><span class='menu'>Home</span></a></li>",
+        "</ul>",
+        "<i role='button' class='fas fa-eye text-secondary' onclick=\"viewBankAccount('0')\"></i>",
+        "<i role='button' class='fas fa-plus-circle text-primary' ",
+        "onclick=\"addBankAccountModal('0','135','BANL BAHLIL')\"></i>",
+    );
+    let target = browser
+        .create_target(&html.parse().expect("data url"))
+        .await
+        .expect("create target");
+    tokio::time::sleep(Duration::from_millis(700)).await;
+
+    let summary = extractor.snapshot(&target).await.expect("snapshot");
+    let names: Vec<(String, Option<String>)> = summary
+        .clickables
+        .iter()
+        .map(|c| (c.tag.clone(), c.ax_name.clone()))
+        .collect();
+    let has = |name: &str| {
+        summary
+            .clickables
+            .iter()
+            .any(|c| c.ax_name.as_deref() == Some(name))
+    };
+
+    // 1. anchor text — direct child and nested <span>.
+    assert!(has("Dashboard"), "direct anchor text; got {names:?}");
+    assert!(has("Home"), "nested span text; got {names:?}");
+
+    // 2. onclick handler name wins, and role=button overrides the <i> tag.
+    let eye = summary
+        .clickables
+        .iter()
+        .find(|c| c.ax_name.as_deref() == Some("view bank account"))
+        .unwrap_or_else(|| panic!("onclick-derived name; got {names:?}"));
+    assert_eq!(eye.tag, "button", "role overrides tag; got {names:?}");
+    assert!(
+        has("add bank account modal"),
+        "second handler; got {names:?}"
+    );
+}

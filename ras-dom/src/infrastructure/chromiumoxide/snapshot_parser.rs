@@ -1,12 +1,12 @@
 use chromiumoxide::cdp::browser_protocol::dom_snapshot::{
     CaptureSnapshotReturns, DocumentSnapshot, NodeTreeSnapshot, StringIndex,
 };
-use ras_types::BackendNodeId;
 use url::Url;
 
 use crate::domain::clickable::ClickableElement;
 use crate::domain::node::BoundingBox;
 use crate::domain::state_summary::PageStatistics;
+use crate::infrastructure::chromiumoxide::clickables::extract_clickables;
 
 const CLICKABLE_TAGS: &[&str] = &[
     "a", "button", "input", "select", "textarea", "summary", "label", "details",
@@ -33,7 +33,7 @@ pub(crate) fn parse_snapshot(
     Ok((url, title, clickables, page_stats))
 }
 
-fn lookup_index(strings: &[String], idx: i64) -> String {
+pub(crate) fn lookup_index(strings: &[String], idx: i64) -> String {
     if idx >= 0 && (idx as usize) < strings.len() {
         strings[idx as usize].clone()
     } else {
@@ -63,61 +63,7 @@ fn build_layout_index(doc: &DocumentSnapshot) -> std::collections::HashMap<i64, 
     map
 }
 
-fn extract_clickables(
-    doc: &DocumentSnapshot,
-    strings: &[String],
-    layout_bbox: &std::collections::HashMap<i64, BoundingBox>,
-) -> Vec<ClickableElement> {
-    let nodes = &doc.nodes;
-    let Some(node_names) = &nodes.node_name else {
-        return Vec::new();
-    };
-    let backend_ids = nodes.backend_node_id.as_ref();
-    let attrs = nodes.attributes.as_ref();
-    let mut out = Vec::new();
-    let mut clickable_index: u32 = 0;
-    for (i, name) in node_names.iter().enumerate() {
-        let tag_lower = lookup_index(strings, *name.inner()).to_lowercase();
-        let empty: Vec<StringIndex> = Vec::new();
-        let attr_idxs: &[StringIndex] = attrs
-            .and_then(|a| a.get(i))
-            .map(|a| a.inner().as_slice())
-            .unwrap_or(&empty);
-        let attr_pairs = decode_attrs(attr_idxs, strings);
-        if !is_clickable(&tag_lower, &attr_pairs) {
-            continue;
-        }
-        let backend_node_id = backend_ids
-            .and_then(|b| b.get(i))
-            .map(|v| BackendNodeId(*v.inner()))
-            .unwrap_or(BackendNodeId(0));
-        let bbox = layout_bbox
-            .get(&(i as i64))
-            .copied()
-            .unwrap_or(BoundingBox {
-                x: 0.0,
-                y: 0.0,
-                width: 0.0,
-                height: 0.0,
-            });
-        let ax_name = derive_ax_name(&attr_pairs);
-        let label = derive_label(&attr_pairs);
-        out.push(ClickableElement {
-            index: clickable_index,
-            backend_node_id,
-            bbox,
-            xpath: format!("//*[backendNodeId={}]", backend_node_id.0),
-            stable_hash: String::new(),
-            ax_name,
-            tag: tag_lower,
-            label,
-        });
-        clickable_index += 1;
-    }
-    out
-}
-
-fn decode_attrs(attr_idxs: &[StringIndex], strings: &[String]) -> Vec<(String, String)> {
+pub(crate) fn decode_attrs(attr_idxs: &[StringIndex], strings: &[String]) -> Vec<(String, String)> {
     let mut pairs = Vec::with_capacity(attr_idxs.len() / 2);
     let mut i = 0;
     while i + 1 < attr_idxs.len() {
@@ -130,7 +76,7 @@ fn decode_attrs(attr_idxs: &[StringIndex], strings: &[String]) -> Vec<(String, S
     pairs
 }
 
-fn is_clickable(tag: &str, attrs: &[(String, String)]) -> bool {
+pub(crate) fn is_clickable(tag: &str, attrs: &[(String, String)]) -> bool {
     if CLICKABLE_TAGS.contains(&tag) {
         return true;
     }
@@ -143,24 +89,6 @@ fn is_clickable(tag: &str, attrs: &[(String, String)]) -> bool {
         }
     }
     false
-}
-
-fn derive_ax_name(attrs: &[(String, String)]) -> Option<String> {
-    for key in ["aria-label", "alt", "title", "name", "placeholder"] {
-        if let Some(v) = attrs.iter().find(|(k, _)| k == key)
-            && !v.1.is_empty()
-        {
-            return Some(v.1.clone());
-        }
-    }
-    None
-}
-
-fn derive_label(attrs: &[(String, String)]) -> Option<String> {
-    attrs
-        .iter()
-        .find(|(k, _)| k == "value")
-        .map(|(_, v)| v.clone())
 }
 
 fn build_page_stats(nodes: &NodeTreeSnapshot, clickables: &[ClickableElement]) -> PageStatistics {
