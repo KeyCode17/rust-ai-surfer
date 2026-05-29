@@ -54,6 +54,11 @@ async fn contexts_isolate_cookies() {
     assert_eq!(cookie_len(&a, &tab_b).await, 0, "B must NOT see A's cookie");
 
     a.close_context(&ctx_a).await.expect("close a");
+    let after = a.list_targets_in(&ctx_a).await.unwrap_or_default();
+    assert!(
+        !after.contains(&tab_a),
+        "closed context must no longer list its tab"
+    );
     a.close_context(&ctx_b).await.expect("close b");
 }
 

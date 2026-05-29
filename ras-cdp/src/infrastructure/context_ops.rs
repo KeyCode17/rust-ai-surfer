@@ -26,7 +26,10 @@ pub(crate) async fn create_context(browser: &Arc<Mutex<Browser>>) -> Result<Cont
         .map_err(|e| AppError::ActionFailed(format!("createBrowserContext: {e}")))?;
     let ctx = ContextId(id.inner().as_str().into());
     drop(guard);
-    set_context_download_dir(browser, &ctx).await?;
+    if let Err(e) = set_context_download_dir(browser, &ctx).await {
+        let _ = dispose_context(browser, &ctx).await;
+        return Err(e);
+    }
     Ok(ctx)
 }
 
