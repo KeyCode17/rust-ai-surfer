@@ -6,7 +6,7 @@ use chromiumoxide::Browser;
 use chromiumoxide::handler::HandlerConfig;
 use futures::StreamExt;
 use ras_errors::AppError;
-use ras_types::{BackendNodeId, TargetId};
+use ras_types::{BackendNodeId, ContextId, TargetId};
 use tokio::sync::Mutex;
 use tracing::warn;
 use url::Url;
@@ -19,6 +19,9 @@ use crate::infrastructure::cdp_ext::{
 };
 use crate::infrastructure::chromiumoxide_helpers::{list_target_ids, new_target, page_for};
 use crate::infrastructure::chromiumoxide_input::{click_backend_node, type_chars};
+use crate::infrastructure::context_ops::{
+    create_context, dispose_context, list_targets_in, new_target_in,
+};
 use crate::infrastructure::mouse_input::{
     dispatch_mouse_hold, dispatch_mouse_move, dispatch_mouse_press, dispatch_mouse_release,
 };
@@ -181,5 +184,17 @@ impl BrowserPort for ChromiumoxideAdapter {
     }
     async fn create_target(&self, url: &Url) -> Result<TargetId, AppError> {
         new_target(&self.browser, url).await
+    }
+    async fn create_context(&self) -> Result<ContextId, AppError> {
+        create_context(&self.browser).await
+    }
+    async fn close_context(&self, ctx: &ContextId) -> Result<(), AppError> {
+        dispose_context(&self.browser, ctx).await
+    }
+    async fn new_target_in(&self, ctx: &ContextId, url: &Url) -> Result<TargetId, AppError> {
+        new_target_in(&self.browser, ctx, url).await
+    }
+    async fn list_targets_in(&self, ctx: &ContextId) -> Result<Vec<TargetId>, AppError> {
+        list_targets_in(&self.browser, ctx).await
     }
 }
