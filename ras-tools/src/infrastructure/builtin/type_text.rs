@@ -47,7 +47,10 @@ impl ToolHandler for TypeTextAction {
     ) -> Result<ActionResult, AppError> {
         let p: Params = serde_json::from_value(params)
             .map_err(|e| AppError::ValidationError(format!("type params: {e}")))?;
-        let target = ctx.browser.focused_target().await?;
+        let target = ctx
+            .target
+            .clone()
+            .ok_or_else(|| AppError::NotFound("no active target".into()))?;
         if let Some(idx) = p.index {
             let element = ctx
                 .clickables

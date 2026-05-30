@@ -5,13 +5,14 @@ use ras_cdp::BrowserPort;
 use ras_dom::ClickableElement;
 use ras_errors::AppError;
 use ras_events::EventBus;
-use ras_types::ActionName;
+use ras_types::{ActionName, TargetId};
 use url::Url;
 
 use crate::domain::action::{RegisteredAction, ToolHandler};
 
 #[derive(Clone)]
 pub struct ToolContext {
+    pub target: Option<TargetId>,
     pub browser: Arc<dyn BrowserPort>,
     pub events: Arc<dyn EventBus>,
     pub page_url: Option<Url>,
@@ -22,6 +23,7 @@ pub struct ToolContext {
 impl std::fmt::Debug for ToolContext {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.debug_struct("ToolContext")
+            .field("target", &self.target)
             .field("page_url", &self.page_url)
             .finish()
     }

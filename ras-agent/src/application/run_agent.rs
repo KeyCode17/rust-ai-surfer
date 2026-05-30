@@ -6,7 +6,7 @@ use ras_errors::AppError;
 use ras_events::EventBus;
 use ras_llm::{ChatMessage, LlmClient};
 use ras_tools::domain::registry::ActionRegistry;
-use ras_types::{AgentId, StepId};
+use ras_types::{AgentId, StepId, TargetId};
 
 use crate::application::render_step_message::render_step_message;
 use crate::application::run_step::RunStep;
@@ -19,6 +19,7 @@ pub struct RunAgent {
     pub agent: AgentId,
     pub task: String,
     pub max_steps: u32,
+    pub bound_target: Option<TargetId>,
     pub primary_llm: Arc<dyn LlmClient>,
     pub fallback_llm: Option<Arc<dyn LlmClient>>,
     pub registry: Arc<ActionRegistry>,
@@ -39,6 +40,7 @@ impl RunAgent {
             agent: AgentId::new(),
             task: task.into(),
             max_steps: 25,
+            bound_target: None,
             primary_llm: llm,
             fallback_llm: None,
             registry,
@@ -46,6 +48,12 @@ impl RunAgent {
             events,
             dom_extractor: None,
         }
+    }
+
+    #[must_use]
+    pub fn with_target(mut self, target: TargetId) -> Self {
+        self.bound_target = Some(target);
+        self
     }
 
     #[must_use]
@@ -74,6 +82,7 @@ impl RunAgent {
             self.browser.clone(),
             self.events.clone(),
             self.dom_extractor.clone(),
+            self.bound_target.clone(),
         );
         let mut detector = ActionLoopDetector::new();
         let mut history = AgentHistory {

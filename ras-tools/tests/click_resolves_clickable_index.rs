@@ -99,6 +99,7 @@ fn clickable(index: u32, backend: i64) -> ClickableElement {
 
 fn ctx_with(browser: Arc<CaptureBrowser>, clickables: Vec<ClickableElement>) -> ToolContext {
     ToolContext {
+        target: Some(TargetId("t-1".into())),
         browser,
         events: Arc::new(BroadcastBus::default()),
         page_url: None,
