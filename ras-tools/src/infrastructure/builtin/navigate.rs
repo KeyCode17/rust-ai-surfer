@@ -50,7 +50,10 @@ impl ToolHandler for NavigateAction {
         let p: Params = serde_json::from_value(params)
             .map_err(|e| AppError::ValidationError(format!("navigate params: {e}")))?;
         let url = parse_and_check(&p.url)?;
-        let target = ctx.browser.focused_target().await?;
+        let target = ctx
+            .target
+            .clone()
+            .ok_or_else(|| AppError::NotFound("no active target".into()))?;
         ctx.browser.navigate(&target, &url).await?;
         Ok(ActionResult::ok(format!("navigated to {url}")))
     }

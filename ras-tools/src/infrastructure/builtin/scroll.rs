@@ -50,7 +50,10 @@ impl ToolHandler for ScrollAction {
             .map_err(|e| AppError::ValidationError(format!("scroll params: {e}")))?;
         let dir = if p.direction == "up" { -1 } else { 1 };
         let dy = p.amount * dir;
-        let target = ctx.browser.focused_target().await?;
+        let target = ctx
+            .target
+            .clone()
+            .ok_or_else(|| AppError::NotFound("no active target".into()))?;
         let _ = ctx
             .browser
             .evaluate(&target, &format!("window.scrollBy(0, {dy});"))
