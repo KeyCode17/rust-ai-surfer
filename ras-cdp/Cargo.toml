@@ -27,7 +27,8 @@ tracing       = { workspace = true }
 url           = { workspace = true }
 
 [dev-dependencies]
-tokio      = { workspace = true, features = ["macros", "rt-multi-thread"] }
+tokio      = { workspace = true, features = ["macros", "rt-multi-thread", "time"] }
 url        = { workspace = true }
 serde_json = { workspace = true }
 ras-types  = { workspace = true }
+ras-events = { workspace = true }
