@@ -18,6 +18,7 @@ impl CallLog {
         self.0.lock().expect("lock").push(s.into());
     }
 
+    #[allow(dead_code)]
     pub fn snapshot(&self) -> Vec<String> {
         self.0.lock().expect("lock").clone()
     }
@@ -116,6 +117,10 @@ impl BrowserPort for MockBrowser {
 
     async fn create_target(&self, _url: &Url) -> Result<TargetId, AppError> {
         Ok(TargetId("stub-target".into()))
+    }
+
+    async fn new_target_in(&self, _ctx: &ContextId, _url: &Url) -> Result<TargetId, AppError> {
+        Ok(TargetId("tab".into()))
     }
 
     async fn create_context(&self) -> Result<ContextId, AppError> {

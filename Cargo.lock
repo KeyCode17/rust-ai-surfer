@@ -2020,9 +2020,13 @@ name = "ras-session"
 version = "3.5.0"
 dependencies = [
  "async-trait",
+ "ras-agent",
  "ras-cdp",
+ "ras-dom",
  "ras-errors",
  "ras-events",
+ "ras-llm",
+ "ras-tools",
  "ras-types",
  "serde_json",
  "tokio",

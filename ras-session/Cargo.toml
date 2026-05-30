@@ -16,8 +16,13 @@ ras-errors  = { workspace = true }
 ras-types   = { workspace = true }
 ras-cdp     = { workspace = true }
 ras-events  = { workspace = true }
+ras-agent   = { workspace = true }
+ras-tools   = { workspace = true }
+ras-llm     = { workspace = true }
+ras-dom     = { workspace = true }
 async-trait = { workspace = true }
 tokio       = { workspace = true }
+url         = { workspace = true }
 
 [dev-dependencies]
 tokio      = { workspace = true, features = ["macros", "rt-multi-thread"] }
