@@ -14,9 +14,10 @@ Rust port of [browser-use](https://github.com/browser-use/browser-use), driven b
 - **BrowserSession over CDP** via [chromiumoxide](https://crates.io/crates/chromiumoxide) with per-request timeout decorator
 - **Cosmium binary launcher** — fingerprint profile JSON → `--cosmium-*` switch mapping, free-port discovery, tempdir for `--user-data-dir`, ready-poll on `/json/version`; also dual `Attach` mode for an externally launched Chromium
 - **★ ChatAnthropicClaudeCode** — 4-tier OAuth credential chain (env API-key bail → macOS Keychain → `~/.claude/.credentials.json` → `~/.claude/settings.json`), `cc_version` resolution from `claude --version`, byte-parity billing header injection
-- **Tools registry** — 8 built-ins (navigate, click_element, click_coordinate, type_text, scroll, screenshot, wait, done), `terminates_sequence` flag, domain filter, per-action timeout. Click + type now drive real CDP input events (Input.dispatchMouseEvent / Input.insertText)
+- **★ Multi-tenant tier (v4.0.0)** — embed the crates in a multi-user SaaS: per-user `BrowserContext` isolation (separate cookies/storage/downloads), an egress/SSRF policy (`ras-validation::EgressPolicy` blocks cloud-metadata/loopback/private hosts + `file:`/`chrome:` schemes), explicit per-agent tab binding (`ToolContext.target` — no `focused_target` race), a per-tab→`EventBus` event producer (`attach_events`), and the optional `ras-session` `SessionManager`/`SessionHandle` (bounded sessions, idle eviction, one-task-per-session, `BrowserProvider` strategy seam for context-vs-process isolation)
+- **Tools registry** — built-ins (navigate, click_element, click_coordinate, type_text, scroll, screenshot, press_and_hold_element, press_and_hold_coordinate, wait, done), `terminates_sequence` flag, domain filter, per-action timeout. Click + type drive real CDP input events (Input.dispatchMouseEvent / Input.insertText); `navigate` is gated through the egress policy before touching the browser
 - **DOM extraction primitives** — dynamic class filter, stable hash (Sha256 of parent xpath + tag + id + role + filtered classes + ax_name), paint-order rect union, skeleton-page detector
-- **DOM grounding** — `ChromiumoxideDomExtractor` captures a per-step snapshot, the agent gets a numbered clickable map injected into the prompt, and `click_element(list_index)` resolves to a `BackendNodeId` before dispatch
+- **DOM grounding** — `ChromiumoxideDomExtractor` captures a per-step snapshot, the agent gets a numbered clickable map injected into the prompt, and `click_element(list_index)` resolves to a `BackendNodeId` before dispatch. Clickable names are derived from descendant text, `onclick` handler, FontAwesome icon class, and `role` (with CDP-native `isClickable` union); the map keeps up to 200 elements, visible-first on truncation
 - **Watchdogs** — security (allowed/prohibited domains + IPv4/IPv6 block), popups, crash, downloads — backed by an `async-broadcast` event bus
 - **Multi-provider LLMs** — Anthropic + Claude Code OAuth, OpenAI + Azure, Google, Groq, Bedrock, OpenRouter, Vercel, DeepSeek, Cerebras, Mistral, Ollama, OCI, Cloud, LangChain (OpenAI-compatible providers re-export `ChatOpenAICompatible`)
 - **FileSystem** — `BaseFile` per type, RFC 4180 CSV normalize, regex-validated filenames, tokio::fs-backed `LocalFileSystem`
@@ -33,7 +34,7 @@ rust-ai-surfer/
 ├── ras-daemon/                   long-running session daemon (apps)
 ├── ras-errors/                   centralized AppError        (foundation)
 ├── ras-types/                    shared types + ID newtypes  (foundation)
-├── ras-validation/               Validated<T> extractor      (foundation)
+├── ras-validation/               Validated<T> + EgressPolicy (foundation)
 ├── ras-config/                   env + logger bootstrap      (foundation)
 ├── ras-events/                   tokio broadcast event bus   (platform)
 ├── ras-cdp/                      chromiumoxide adapter       (platform)
@@ -44,6 +45,7 @@ rust-ai-surfer/
 ├── ras-browser/                  BrowserSession mode dispatch
 ├── ras-dom/                      DOM tree + clickable + hash
 ├── ras-tools/                    action registry + built-ins
+├── ras-session/                  multi-tenant SessionManager + BrowserProvider
 ├── ras-watchdogs/                security, popups, crash, downloads
 ├── ras-filesystem/               Csv/Md/Json/Jsonl/Html/Docx/Pdf/Txt
 ├── ras-tokens/                   token-cost service
@@ -61,7 +63,7 @@ rust-ai-surfer/
 └── scripts/                      lefthook helpers
 ```
 
-39 workspace members (36 lib + 2 bin + xtask; `examples/` is a separate cargo manifest). 50+ unit/integration tests pass under `-D warnings` clippy.
+40 workspace members (37 lib + 2 bin + xtask; `examples/` is a separate cargo manifest). Unit + integration tests pass under `-D warnings` clippy; browser-dependent isolation/grounding tests are `#[ignore]` and run live against a CDP endpoint via `CDP_URL`.
 
 ## Quick start
 
@@ -157,7 +159,7 @@ ADRs live in [`docs/adr/`](docs/adr/):
 
 ## Porting status
 
-Feature-for-feature port of [browser-use](https://github.com/browser-use/browser-use) shipped across 11 phases (`0.1.0` → `1.0.0`). The `2.x` line is the post-port stable surface: crates published to crates.io, Rust 1.95 pinned, DOM grounding + real CDP input events landed. The end-to-end OAuth + cosmium path is the verified main course. See [`docs/porting-from-browser-use.md`](docs/porting-from-browser-use.md) for the phase-by-phase map and the naming map between the Python source and the Rust crate layout.
+Feature-for-feature port of [browser-use](https://github.com/browser-use/browser-use) shipped across 11 phases (`0.1.0` → `1.0.0`). The `2.x` line is the post-port stable surface: crates published to crates.io, Rust 1.95 pinned, DOM grounding + real CDP input events landed. The `3.x` line hardened DOM grounding (richer clickable naming) and shipped the **multi-tenant tier** in five phases — `3.2.0` BrowserContext isolation, `3.3.0` egress/SSRF policy, `3.4.0` agent target binding, `3.5.0` event producer, `3.6.0` the `ras-session` SessionManager. **`4.0.0`** marks that tier complete (see the [v4.0.0 release notes](https://github.com/KeyCode17/rust-ai-surfer/releases/tag/v4.0.0) and `docs/superpowers/specs/2026-05-30-multi-tenant-tier-design.md`). The end-to-end OAuth + cosmium path is the verified main course. See [`docs/porting-from-browser-use.md`](docs/porting-from-browser-use.md) for the phase-by-phase map and the naming map between the Python source and the Rust crate layout.
 
 ## License
 
