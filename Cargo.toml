@@ -32,6 +32,7 @@ members = [
     "ras-browser",
     "ras-dom",
     "ras-tools",
+    "ras-session",
     "ras-watchdogs",
     "ras-filesystem",
     "ras-tokens",
@@ -51,7 +52,7 @@ exclude         = ["examples", "tests", "docs", "scripts"]
 default-members = ["ras-cli", "ras-daemon"]
 
 [workspace.package]
-version       = "3.5.0"
+version       = "3.6.0"
 edition       = "2024"
 rust-version  = "1.95.0"
 license       = "MIT"
@@ -91,6 +92,7 @@ ras-llm-langchain   = { path = "ras-llm-langchain",   version = "3.0.0" }
 ras-browser     = { path = "ras-browser",     version = "3.0.0" }
 ras-dom         = { path = "ras-dom",         version = "3.0.0" }
 ras-tools       = { path = "ras-tools",       version = "3.0.0" }
+ras-session     = { path = "ras-session",     version = "3.5.0" }
 ras-watchdogs   = { path = "ras-watchdogs",   version = "3.0.0" }
 ras-filesystem  = { path = "ras-filesystem",  version = "3.0.0" }
 ras-tokens      = { path = "ras-tokens",      version = "3.0.0" }
