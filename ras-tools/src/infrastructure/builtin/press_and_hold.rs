@@ -58,7 +58,10 @@ impl ToolHandler for PressAndHoldCoordinateAction {
         let p: CoordParams = serde_json::from_value(params)
             .map_err(|e| AppError::ValidationError(format!("press_and_hold_coordinate: {e}")))?;
         let hold = clamp_hold(p.ms.unwrap_or(DEFAULT_HOLD_MS));
-        let target = ctx.browser.focused_target().await?;
+        let target = ctx
+            .target
+            .clone()
+            .ok_or_else(|| AppError::NotFound("no active target".into()))?;
         ctx.browser.mouse_hold(&target, p.x, p.y, hold).await?;
         Ok(ActionResult::ok(format!(
             "held ({}, {}) for {} ms (humanized: approach + jitter)",
@@ -132,7 +135,10 @@ impl ToolHandler for PressAndHoldElementAction {
             ms = hold,
             "press_and_hold_element resolved"
         );
-        let target = ctx.browser.focused_target().await?;
+        let target = ctx
+            .target
+            .clone()
+            .ok_or_else(|| AppError::NotFound("no active target".into()))?;
         ctx.browser.mouse_hold(&target, cx, cy, hold).await?;
         Ok(ActionResult::ok(format!(
             "held element {} at ({}, {}) for {} ms (humanized: approach + jitter)",

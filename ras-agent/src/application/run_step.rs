@@ -8,7 +8,7 @@ use ras_errors::AppError;
 use ras_events::EventBus;
 use ras_llm::{ChatMessage, ChatResponse, InvokeOptions, LlmClient};
 use ras_tools::domain::registry::{ActionRegistry, ToolContext};
-use ras_types::{ActionResult, StepId};
+use ras_types::{ActionResult, StepId, TargetId};
 use url::Url;
 
 use crate::application::compute_action_hash::compute_action_hash;
@@ -27,6 +27,7 @@ pub struct RunStep {
     browser: Arc<dyn BrowserPort>,
     events: Arc<dyn EventBus>,
     dom_extractor: Option<Arc<dyn DomExtractor>>,
+    bound_target: Option<TargetId>,
 }
 
 impl RunStep {
@@ -38,6 +39,7 @@ impl RunStep {
         browser: Arc<dyn BrowserPort>,
         events: Arc<dyn EventBus>,
         dom_extractor: Option<Arc<dyn DomExtractor>>,
+        bound_target: Option<TargetId>,
     ) -> Self {
         Self {
             primary_llm: primary,
@@ -46,6 +48,7 @@ impl RunStep {
             browser,
             events,
             dom_extractor,
+            bound_target,
         }
     }
 
@@ -68,7 +71,10 @@ impl RunStep {
         let output = parse_agent_output(&response)?;
         log_decision(step.0, &output);
 
-        let target = self.browser.focused_target().await.ok();
+        let target = match &self.bound_target {
+            Some(t) => Some(t.clone()),
+            None => self.browser.focused_target().await.ok(),
+        };
         let page_url = match &target {
             Some(t) => self
                 .browser
@@ -101,6 +107,7 @@ impl RunStep {
                 break;
             };
             let ctx = ToolContext {
+                target: target.clone(),
                 browser: self.browser.clone(),
                 events: self.events.clone(),
                 page_url: page_url.clone(),

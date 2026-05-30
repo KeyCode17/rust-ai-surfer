@@ -12,9 +12,10 @@ authors.workspace      = true
 workspace = true
 
 [dependencies]
-ras-errors  = { workspace = true }
-ras-types   = { workspace = true }
-ras-cdp     = { workspace = true }
+ras-errors      = { workspace = true }
+ras-types       = { workspace = true }
+ras-validation  = { workspace = true }
+ras-cdp         = { workspace = true }
 ras-dom     = { workspace = true }
 ras-events  = { workspace = true }
 async-trait = { workspace = true }

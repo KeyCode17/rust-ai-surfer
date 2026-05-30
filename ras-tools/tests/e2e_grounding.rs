@@ -62,6 +62,7 @@ async fn click_and_type_resolve_through_clickable_map() {
         .expect("button clickable");
 
     let ctx = ToolContext {
+        target: Some(target.clone()),
         browser: browser.clone(),
         events: Arc::new(BroadcastBus::default()),
         page_url: None,

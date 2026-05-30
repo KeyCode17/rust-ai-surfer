@@ -57,7 +57,10 @@ impl ToolHandler for ClickElementAction {
             xpath = %element.xpath,
             "click_element resolved"
         );
-        let target = ctx.browser.focused_target().await?;
+        let target = ctx
+            .target
+            .clone()
+            .ok_or_else(|| AppError::NotFound("no active target".into()))?;
         ctx.browser
             .click_node(&target, element.backend_node_id)
             .await?;
@@ -101,7 +104,10 @@ impl ToolHandler for ClickCoordinateAction {
     ) -> Result<ActionResult, AppError> {
         let p: CoordParams = serde_json::from_value(params)
             .map_err(|e| AppError::ValidationError(format!("click_coord params: {e}")))?;
-        let target = ctx.browser.focused_target().await?;
+        let target = ctx
+            .target
+            .clone()
+            .ok_or_else(|| AppError::NotFound("no active target".into()))?;
         ctx.browser.click_at(&target, p.x, p.y).await?;
         Ok(ActionResult::ok(format!("clicked at ({}, {})", p.x, p.y)))
     }

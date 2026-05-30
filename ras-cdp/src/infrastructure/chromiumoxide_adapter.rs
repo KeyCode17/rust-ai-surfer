@@ -3,13 +3,12 @@ use std::time::Duration;
 
 use async_trait::async_trait;
 use chromiumoxide::Browser;
-use chromiumoxide::handler::HandlerConfig;
-use futures::StreamExt;
 use ras_errors::AppError;
-use ras_types::{BackendNodeId, TargetId};
+use ras_types::{BackendNodeId, ContextId, TargetId};
 use tokio::sync::Mutex;
-use tracing::warn;
 use url::Url;
+
+use ras_events::EventBus;
 
 use crate::domain::repository::{BrowserPort, ScreenshotFormat};
 use crate::domain::viewport::Viewport;
@@ -19,49 +18,18 @@ use crate::infrastructure::cdp_ext::{
 };
 use crate::infrastructure::chromiumoxide_helpers::{list_target_ids, new_target, page_for};
 use crate::infrastructure::chromiumoxide_input::{click_backend_node, type_chars};
+use crate::infrastructure::context_ops::{
+    create_context, dispose_context, list_targets_in, new_target_in,
+};
 use crate::infrastructure::mouse_input::{
     dispatch_mouse_hold, dispatch_mouse_move, dispatch_mouse_press, dispatch_mouse_release,
 };
 use crate::infrastructure::timeout::within;
 
 pub struct ChromiumoxideAdapter {
-    browser: Arc<Mutex<Browser>>,
-    cdp_url: Url,
-    request_timeout: Duration,
-}
-
-impl std::fmt::Debug for ChromiumoxideAdapter {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("ChromiumoxideAdapter")
-            .field("cdp_url", &self.cdp_url)
-            .finish()
-    }
-}
-
-impl ChromiumoxideAdapter {
-    #[must_use]
-    pub fn browser_arc(&self) -> Arc<Mutex<Browser>> {
-        Arc::clone(&self.browser)
-    }
-
-    pub async fn connect(cdp_url: Url, request_timeout: Duration) -> Result<Self, AppError> {
-        let cfg = HandlerConfig::default();
-        let (browser, mut handler) = Browser::connect_with_config(cdp_url.as_str(), cfg)
-            .await
-            .map_err(|e| AppError::BrowserDisconnected(format!("cdp connect: {e}")))?;
-        tokio::spawn(async move {
-            while let Some(ev) = handler.next().await {
-                if let Err(e) = ev {
-                    warn!(error = %e, "cdp handler event error");
-                }
-            }
-        });
-        Ok(Self {
-            browser: Arc::new(Mutex::new(browser)),
-            cdp_url,
-            request_timeout,
-        })
-    }
+    pub(crate) browser: Arc<Mutex<Browser>>,
+    pub(crate) cdp_url: Url,
+    pub(crate) request_timeout: Duration,
 }
 
 macro_rules! op {
@@ -181,5 +149,26 @@ impl BrowserPort for ChromiumoxideAdapter {
     }
     async fn create_target(&self, url: &Url) -> Result<TargetId, AppError> {
         new_target(&self.browser, url).await
+    }
+    async fn create_context(&self) -> Result<ContextId, AppError> {
+        create_context(&self.browser).await
+    }
+    async fn close_context(&self, ctx: &ContextId) -> Result<(), AppError> {
+        dispose_context(&self.browser, ctx).await
+    }
+    async fn new_target_in(&self, ctx: &ContextId, url: &Url) -> Result<TargetId, AppError> {
+        new_target_in(&self.browser, ctx, url).await
+    }
+    async fn list_targets_in(&self, ctx: &ContextId) -> Result<Vec<TargetId>, AppError> {
+        list_targets_in(&self.browser, ctx).await
+    }
+
+    async fn attach_events(
+        &self,
+        target: &TargetId,
+        bus: std::sync::Arc<dyn EventBus>,
+    ) -> Result<(), AppError> {
+        let page = page_for(&self.browser, target).await?;
+        crate::infrastructure::event_pump::attach(&page, target.clone(), bus).await
     }
 }

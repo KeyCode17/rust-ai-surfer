@@ -28,7 +28,10 @@ impl ToolHandler for ScreenshotAction {
         _params: serde_json::Value,
         ctx: ToolContext,
     ) -> Result<ActionResult, AppError> {
-        let target = ctx.browser.focused_target().await?;
+        let target = ctx
+            .target
+            .clone()
+            .ok_or_else(|| AppError::NotFound("no active target".into()))?;
         let bytes = ctx
             .browser
             .screenshot(&target, ScreenshotFormat::Png)
