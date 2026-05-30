@@ -8,6 +8,8 @@ use ras_types::{BackendNodeId, ContextId, TargetId};
 use tokio::sync::Mutex;
 use url::Url;
 
+use ras_events::EventBus;
+
 use crate::domain::repository::{BrowserPort, ScreenshotFormat};
 use crate::domain::viewport::Viewport;
 use crate::infrastructure::cdp_ext::{
@@ -159,5 +161,14 @@ impl BrowserPort for ChromiumoxideAdapter {
     }
     async fn list_targets_in(&self, ctx: &ContextId) -> Result<Vec<TargetId>, AppError> {
         list_targets_in(&self.browser, ctx).await
+    }
+
+    async fn attach_events(
+        &self,
+        target: &TargetId,
+        bus: std::sync::Arc<dyn EventBus>,
+    ) -> Result<(), AppError> {
+        let page = page_for(&self.browser, target).await?;
+        crate::infrastructure::event_pump::attach(&page, target.clone(), bus).await
     }
 }

@@ -1,5 +1,8 @@
+use std::sync::Arc;
+
 use async_trait::async_trait;
 use ras_errors::AppError;
+use ras_events::EventBus;
 use ras_types::{BackendNodeId, ContextId, TargetId};
 use serde::{Deserialize, Serialize};
 use url::Url;
@@ -91,5 +94,16 @@ pub trait BrowserPort: Send + Sync + 'static {
         Err(AppError::ActionFailed(
             "list_targets_in not supported by this BrowserPort".into(),
         ))
+    }
+
+    /// Forward this target's browser events to `bus` (per-session isolation).
+    ///
+    /// Default: no-op. Override in adapters that support live CDP streams.
+    async fn attach_events(
+        &self,
+        _target: &TargetId,
+        _bus: Arc<dyn EventBus>,
+    ) -> Result<(), AppError> {
+        Ok(())
     }
 }
