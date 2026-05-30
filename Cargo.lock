@@ -2016,6 +2016,20 @@ dependencies = [
 ]
 
 [[package]]
+name = "ras-session"
+version = "3.5.0"
+dependencies = [
+ "async-trait",
+ "ras-cdp",
+ "ras-errors",
+ "ras-events",
+ "ras-types",
+ "serde_json",
+ "tokio",
+ "url",
+]
+
+[[package]]
 name = "ras-skills"
 version = "3.5.0"
 dependencies = [
