@@ -141,7 +141,7 @@ fn build_prompt(task: &str, history: &[StepRecord], registry: &ActionRegistry) -
          - Call the `done` action when the task is complete; pass the final answer in \
            its parameters. Returning an empty action list is treated as a failure."
     );
-    let mut out = vec![ChatMessage::system(system)];
+    let mut out = vec![ChatMessage::system_cached(system)];
     for step in history.iter().rev().take(4).rev() {
         if let Ok(j) = serde_json::to_string(&step.output) {
             out.push(ChatMessage::assistant_text(j));
