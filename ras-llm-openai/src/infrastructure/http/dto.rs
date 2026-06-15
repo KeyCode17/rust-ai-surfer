@@ -78,16 +78,26 @@ pub struct PromptTokensDetails {
     pub cached_tokens: u32,
 }
 
+/// Map domain messages to wire DTOs. `allow_cache_control` gates the prompt-cache
+/// breakpoint onto a `cache: true` system message ONLY for an Anthropic-routed
+/// target; otherwise the flag is inert (plain string) so a non-Anthropic
+/// provider never 400s on the unknown `cache_control` field.
 #[must_use]
-pub fn to_dto_messages(messages: Vec<ChatMessage>) -> Vec<ChatMessageDto> {
-    messages.into_iter().map(map_one).collect()
+pub fn to_dto_messages(
+    messages: Vec<ChatMessage>,
+    allow_cache_control: bool,
+) -> Vec<ChatMessageDto> {
+    messages
+        .into_iter()
+        .map(|m| map_one(m, allow_cache_control))
+        .collect()
 }
 
-fn map_one(m: ChatMessage) -> ChatMessageDto {
+fn map_one(m: ChatMessage, allow_cache_control: bool) -> ChatMessageDto {
     match m {
         ChatMessage::System(s) => ChatMessageDto {
             role: "system".into(),
-            content: system_content(s.content, s.cache),
+            content: system_content(s.content, s.cache && allow_cache_control),
         },
         ChatMessage::User(u) => {
             let parts: Vec<serde_json::Value> = u
@@ -141,15 +151,11 @@ fn system_content(text: String, cache: bool) -> serde_json::Value {
 pub fn response_to_chat(r: ChatCompletionResponse) -> ChatResponse {
     let model = r.model.clone();
     let usage = r.usage.unwrap_or_default();
-    let cache_read = usage
-        .cache_read_input_tokens
-        .or_else(|| {
-            usage
-                .prompt_tokens_details
-                .as_ref()
-                .map(|d| d.cached_tokens)
-        })
-        .unwrap_or(0);
+    let detail_cached = usage
+        .prompt_tokens_details
+        .as_ref()
+        .map(|d| d.cached_tokens);
+    let cache_read = usage.cache_read_input_tokens.or(detail_cached).unwrap_or(0);
     let cache_creation = usage.cache_creation_input_tokens.unwrap_or(0);
     let mut content = None;
     let mut tool_calls = Vec::new();

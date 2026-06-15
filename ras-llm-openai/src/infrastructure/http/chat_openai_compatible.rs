@@ -55,6 +55,18 @@ impl std::fmt::Debug for ChatOpenAICompatible {
     }
 }
 
+/// Whether `model` accepts an Anthropic-style `cache_control` breakpoint. Only
+/// Anthropic-routed models do (OpenRouter `anthropic/…`, a bare `claude…` id, or
+/// a `…anthropic.claude…` route). This OpenAI-compatible client is shared by
+/// OpenAI, Groq, Cerebras, Mistral, Vercel and DeepSeek, all of which reject the
+/// unknown `cache_control` field (HTTP 400) — so for them the breakpoint is NOT
+/// emitted and a `cache: true` prompt is sent as a plain string (inert).
+#[must_use]
+pub fn model_supports_cache_control(model: &str) -> bool {
+    let m = model.to_ascii_lowercase();
+    m.starts_with("anthropic/") || m.starts_with("claude") || m.contains("anthropic.claude")
+}
+
 #[async_trait]
 impl LlmClient for ChatOpenAICompatible {
     fn provider(&self) -> ProviderName {
@@ -72,7 +84,7 @@ impl LlmClient for ChatOpenAICompatible {
     ) -> Result<ChatResponse, AppError> {
         let req = ChatRequest {
             model: self.model.clone(),
-            messages: to_dto_messages(messages),
+            messages: to_dto_messages(messages, model_supports_cache_control(&self.model)),
             max_tokens: options.max_tokens,
             temperature: options.temperature,
             stop: options.stop_sequences,
