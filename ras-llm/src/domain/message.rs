@@ -64,6 +64,18 @@ impl ChatMessage {
         })
     }
 
+    /// A system message marked for prompt caching. Use for a large, STABLE
+    /// prefix (a task/system prompt re-sent every step): providers that support
+    /// it (Anthropic via OpenRouter) read the prefix from cache instead of
+    /// re-prefilling it, cutting per-step latency and cost with no output change.
+    #[must_use]
+    pub fn system_cached(content: impl Into<String>) -> Self {
+        Self::System(SystemMessage {
+            content: content.into(),
+            cache: true,
+        })
+    }
+
     #[must_use]
     pub fn user_text(text: impl Into<String>) -> Self {
         Self::User(UserMessage {
