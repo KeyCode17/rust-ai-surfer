@@ -62,6 +62,20 @@ pub struct UsageDto {
     pub completion_tokens: u32,
     #[serde(default)]
     pub total_tokens: u32,
+    #[serde(default)]
+    pub prompt_tokens_details: Option<PromptTokensDetails>,
+    #[serde(default)]
+    pub cache_creation_input_tokens: Option<u32>,
+    #[serde(default)]
+    pub cache_read_input_tokens: Option<u32>,
+}
+
+/// OpenRouter/OpenAI-style breakdown of the prompt token count. `cached_tokens`
+/// is the portion served from the prompt cache — i.e. a cache READ.
+#[derive(Debug, Deserialize, Default)]
+pub struct PromptTokensDetails {
+    #[serde(default)]
+    pub cached_tokens: u32,
 }
 
 #[must_use]
@@ -73,7 +87,7 @@ fn map_one(m: ChatMessage) -> ChatMessageDto {
     match m {
         ChatMessage::System(s) => ChatMessageDto {
             role: "system".into(),
-            content: serde_json::Value::String(s.content),
+            content: system_content(s.content, s.cache),
         },
         ChatMessage::User(u) => {
             let parts: Vec<serde_json::Value> = u
@@ -107,10 +121,36 @@ fn map_one(m: ChatMessage) -> ChatMessageDto {
     }
 }
 
+/// Serialise a system message's content, attaching an Anthropic-style ephemeral
+/// `cache_control` breakpoint (which OpenRouter passes through to Anthropic
+/// models) when `cache` is set, so the large static prefix is read from cache on
+/// later calls instead of re-prefilled. A plain string otherwise (unchanged).
+fn system_content(text: String, cache: bool) -> serde_json::Value {
+    if cache {
+        serde_json::json!([{
+            "type": "text",
+            "text": text,
+            "cache_control": { "type": "ephemeral" }
+        }])
+    } else {
+        serde_json::Value::String(text)
+    }
+}
+
 #[must_use]
 pub fn response_to_chat(r: ChatCompletionResponse) -> ChatResponse {
     let model = r.model.clone();
     let usage = r.usage.unwrap_or_default();
+    let cache_read = usage
+        .cache_read_input_tokens
+        .or_else(|| {
+            usage
+                .prompt_tokens_details
+                .as_ref()
+                .map(|d| d.cached_tokens)
+        })
+        .unwrap_or(0);
+    let cache_creation = usage.cache_creation_input_tokens.unwrap_or(0);
     let mut content = None;
     let mut tool_calls = Vec::new();
     let mut finish = FinishReason::Stop;
@@ -144,8 +184,8 @@ pub fn response_to_chat(r: ChatCompletionResponse) -> ChatResponse {
         usage: Usage {
             input_tokens: usage.prompt_tokens,
             output_tokens: usage.completion_tokens,
-            cache_read_input_tokens: 0,
-            cache_creation_input_tokens: 0,
+            cache_read_input_tokens: cache_read,
+            cache_creation_input_tokens: cache_creation,
         },
         model,
         finish_reason: finish,
