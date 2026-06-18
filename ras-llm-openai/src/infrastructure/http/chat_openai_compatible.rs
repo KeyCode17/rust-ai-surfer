@@ -67,6 +67,20 @@ pub fn model_supports_cache_control(model: &str) -> bool {
     m.starts_with("anthropic/") || m.starts_with("claude") || m.contains("anthropic.claude")
 }
 
+/// Wrap a JSON schema as an OpenAI/OpenRouter `response_format` envelope so the
+/// provider constrains the model's output to it — used to REQUIRE the agent's
+/// `action` field (a weak model otherwise buries the action in `next_goal`).
+/// `None` when no schema is requested.
+#[must_use]
+pub fn response_format(schema: Option<&serde_json::Value>) -> Option<serde_json::Value> {
+    schema.map(|s| {
+        serde_json::json!({
+            "type": "json_schema",
+            "json_schema": { "name": "agent_output", "strict": false, "schema": s }
+        })
+    })
+}
+
 #[async_trait]
 impl LlmClient for ChatOpenAICompatible {
     fn provider(&self) -> ProviderName {
@@ -89,6 +103,13 @@ impl LlmClient for ChatOpenAICompatible {
             temperature: options.temperature,
             stop: options.stop_sequences,
         };
+        let mut req = serde_json::to_value(&req)
+            .map_err(|e| AppError::LlmProviderError(format!("{} serialize: {e}", self.provider)))?;
+        if let (Some(rf), serde_json::Value::Object(map)) =
+            (response_format(options.response_schema.as_ref()), &mut req)
+        {
+            map.insert("response_format".to_string(), rf);
+        }
         let url = format!(
             "{}/v1/chat/completions",
             self.base_url.trim_end_matches('/')
