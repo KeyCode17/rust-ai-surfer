@@ -11,6 +11,7 @@ use crate::infrastructure::builtin::press_and_hold::{
 };
 use crate::infrastructure::builtin::screenshot::ScreenshotAction;
 use crate::infrastructure::builtin::scroll::ScrollAction;
+use crate::infrastructure::builtin::select_option::SelectOptionAction;
 use crate::infrastructure::builtin::type_text::TypeTextAction;
 use crate::infrastructure::builtin::wait::WaitAction;
 
@@ -21,6 +22,7 @@ pub fn register_default_actions(registry: &mut ActionRegistry) -> Result<(), App
     registry.register(Arc::new(PressAndHoldElementAction))?;
     registry.register(Arc::new(PressAndHoldCoordinateAction))?;
     registry.register(Arc::new(TypeTextAction))?;
+    registry.register(Arc::new(SelectOptionAction))?;
     registry.register(Arc::new(ScrollAction))?;
     registry.register(Arc::new(ScreenshotAction))?;
     registry.register(Arc::new(WaitAction))?;

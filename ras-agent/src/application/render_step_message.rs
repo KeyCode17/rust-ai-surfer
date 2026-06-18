@@ -1,6 +1,5 @@
 use ras_llm::{ChatMessage, ContentPart};
 
-use crate::application::clickable_map::render_clickable_map;
 use crate::domain::agent_history::StepRecord;
 
 const TEXT_BUDGET: usize = 480;
@@ -30,10 +29,6 @@ pub(crate) fn render_step_message(step: &StepRecord) -> Option<ChatMessage> {
             text.push('\n');
         }
     }
-    if let Some(summary) = &step.summary {
-        text.push_str(&render_clickable_map(summary));
-    }
-
     let mut parts: Vec<ContentPart> = Vec::with_capacity(2);
     parts.push(ContentPart::Text { text });
     if let Some(b64) = step
