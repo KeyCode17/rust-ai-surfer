@@ -8,4 +8,5 @@ pub mod render_step_message;
 pub mod run_agent;
 pub mod run_step;
 pub(crate) mod run_step_log;
+pub mod salvage;
 pub mod url_shortening;

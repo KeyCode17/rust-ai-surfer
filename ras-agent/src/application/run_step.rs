@@ -16,6 +16,7 @@ use crate::application::detect_loop::{build_budget_warning, build_loop_nudge};
 use crate::application::fallback_llm::should_switch_to_fallback;
 use crate::application::parse_output::parse_agent_output;
 use crate::application::run_step_log::{log_action_err, log_action_ok, log_decision};
+use crate::application::salvage::salvage_into;
 use crate::domain::agent_history::StepRecord;
 use crate::domain::loop_detector::ActionLoopDetector;
 use crate::domain::step_metadata::StepMetadata;
@@ -68,7 +69,8 @@ impl RunStep {
             messages.push(warn);
         }
         let response = self.invoke_with_fallback(messages).await?;
-        let output = parse_agent_output(&response)?;
+        let mut output = parse_agent_output(&response)?;
+        salvage_into(&mut output, &self.registry);
         log_decision(step.0, &output);
 
         let target = match &self.bound_target {
