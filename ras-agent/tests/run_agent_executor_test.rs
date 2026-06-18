@@ -422,3 +422,55 @@ async fn dom_extractor_grounding_reaches_next_prompt() {
         "step 2 prompt must carry the extractor's screenshot bytes"
     );
 }
+
+#[tokio::test]
+async fn first_step_prompt_carries_the_current_clickable_map() {
+    use ras_llm::ContentPart;
+
+    let mut registry = ActionRegistry::new();
+    register_default_actions(&mut registry).expect("test invariant");
+    let registry = Arc::new(registry);
+
+    let browser: Arc<dyn BrowserPort> = Arc::new(MockBrowser::default());
+    let events: Arc<dyn EventBus> = Arc::new(BroadcastBus::new(16));
+    let extractor = Arc::new(ScriptedDomExtractor {
+        calls: Mutex::new(0),
+    });
+
+    let done = r#"{"current_state":{"evaluation_previous_goal":"","memory":"","next_goal":"finish"},"action":[{"name":"done","parameters":{"text":"Done."}}]}"#;
+    let scripted = Arc::new(ScriptedLlm::new(vec![done]));
+    let llm: Arc<dyn LlmClient> = scripted.clone();
+
+    RunAgent::new("login", llm, registry, browser, events)
+        .with_max_steps(5)
+        .with_dom_extractor(extractor.clone())
+        .execute()
+        .await
+        .expect("agent run");
+
+    let received = scripted.received.lock().expect("test invariant").clone();
+    assert!(!received.is_empty(), "expected at least 1 LLM invocation");
+
+    // The VERY FIRST prompt — before any step history exists — must already carry
+    // the live clickable map snapshotted just before invoke, so the index space the
+    // model chooses from is the SAME set the executor validates against (no stale 97).
+    let first = &received[0];
+    let mut saw_live_map = false;
+    for m in first {
+        if let ChatMessage::User(u) = m {
+            for p in &u.content {
+                if let ContentPart::Text { text } = p
+                    && text.contains("CURRENT PAGE")
+                    && text.contains("[0] button \"Sign in\"")
+                    && text.contains("[1] input \"Email\"")
+                {
+                    saw_live_map = true;
+                }
+            }
+        }
+    }
+    assert!(
+        saw_live_map,
+        "step 1 prompt must carry the live clickable map from the pre-invoke snapshot"
+    );
+}

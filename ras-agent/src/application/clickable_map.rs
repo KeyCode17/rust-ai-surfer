@@ -1,7 +1,24 @@
 use ras_dom::{BrowserStateSummary, ClickableElement};
+use ras_llm::ChatMessage;
 
 const CLICKABLE_LIMIT: usize = 200;
 const NAME_BUDGET: usize = 80;
+
+/// A user message carrying the CURRENT page's clickable map (the live snapshot
+/// for THIS step). The model must choose indices from here, and the executor
+/// validates the chosen index against the SAME snapshot — so a picked index
+/// always exists (no stale 97-vs-87 mismatch). `None` when there are no
+/// clickables.
+pub(crate) fn build_current_page_message(summary: &BrowserStateSummary) -> Option<ChatMessage> {
+    let map = render_clickable_map(summary);
+    if map.is_empty() {
+        return None;
+    }
+    Some(ChatMessage::user_text(format!(
+        "CURRENT PAGE — choose actions using ONLY these live element indices:\nurl: {}\n{map}",
+        summary.url
+    )))
+}
 
 pub(crate) fn render_clickable_map(summary: &BrowserStateSummary) -> String {
     if summary.clickables.is_empty() {
@@ -133,5 +150,28 @@ mod tests {
         assert!(out.contains(&format!("[{}]", CLICKABLE_LIMIT - 1)));
         assert!(!out.contains(&format!("[{}]", CLICKABLE_LIMIT)));
         assert!(out.contains("…and 5 more (truncated)"));
+    }
+
+    #[test]
+    fn current_page_message_carries_the_live_indices() {
+        let s = summary_with(vec![
+            click(0, "button", Some("Sign in"), None),
+            click(1, "input", Some("Email"), None),
+        ]);
+        let msg = build_current_page_message(&s).expect("message");
+        let ras_llm::ChatMessage::User(u) = msg else {
+            panic!("expected user message");
+        };
+        let ras_llm::ContentPart::Text { text } = &u.content[0] else {
+            panic!("expected text part");
+        };
+        assert!(text.contains("CURRENT PAGE"));
+        assert!(text.contains("[0] button \"Sign in\""));
+        assert!(text.contains("[1] input \"Email\""));
+    }
+
+    #[test]
+    fn current_page_message_is_none_without_clickables() {
+        assert!(build_current_page_message(&summary_with(vec![])).is_none());
     }
 }

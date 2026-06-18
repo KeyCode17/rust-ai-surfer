@@ -5,5 +5,6 @@ pub mod press_and_hold;
 pub mod register;
 pub mod screenshot;
 pub mod scroll;
+pub mod select_option;
 pub mod type_text;
 pub mod wait;

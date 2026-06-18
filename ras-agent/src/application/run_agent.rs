@@ -8,6 +8,7 @@ use ras_llm::{ChatMessage, LlmClient};
 use ras_tools::domain::registry::ActionRegistry;
 use ras_types::{AgentId, StepId, TargetId};
 
+use crate::application::detect_loop::build_empty_action_nudge;
 use crate::application::render_step_message::render_step_message;
 use crate::application::run_step::RunStep;
 use crate::domain::agent_history::{AgentHistory, AgentHistoryList, StepRecord};
@@ -92,8 +93,12 @@ impl RunAgent {
         };
         let mut last_step_ms: Option<u64> = None;
         let mut empty_streak: u32 = 0;
+        let mut prev_empty = false;
         for n in 0..self.max_steps {
-            let prompt = build_prompt(&self.task, &history.steps, &self.registry);
+            let mut prompt = build_prompt(&self.task, &history.steps, &self.registry);
+            if let Some(nudge) = build_empty_action_nudge(prev_empty) {
+                prompt.push(nudge);
+            }
             let mut record = runner
                 .execute(StepId(n), self.max_steps, prompt, &mut detector)
                 .await?;
@@ -103,12 +108,14 @@ impl RunAgent {
             let done = record.results.iter().any(|r| r.is_done);
             if record.output.action.is_empty() {
                 empty_streak += 1;
+                prev_empty = true;
                 tracing::warn!(
                     step = n,
-                    "model returned empty action list (streak={empty_streak}); treating as stalled"
+                    "model returned empty action list (streak={empty_streak}); re-prompting once, then stall"
                 );
             } else {
                 empty_streak = 0;
+                prev_empty = false;
             }
 
             history.steps.push(record);
