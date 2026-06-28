@@ -1,5 +1,5 @@
 use chromiumoxide::cdp::browser_protocol::dom_snapshot::{
-    CaptureSnapshotReturns, DocumentSnapshot, NodeTreeSnapshot, StringIndex,
+    CaptureSnapshotReturns, DocumentSnapshot, StringIndex,
 };
 use url::Url;
 
@@ -16,19 +16,27 @@ pub(crate) fn parse_snapshot(
     resp: &CaptureSnapshotReturns,
 ) -> Result<(Url, String, Vec<ClickableElement>, PageStatistics), String> {
     let strings = &resp.strings;
-    let doc = resp
+    let main = resp
         .documents
         .first()
         .ok_or_else(|| "no documents in snapshot".to_string())?;
-    let url_str = lookup_index(strings, *doc.document_url.inner());
+    let url_str = lookup_index(strings, *main.document_url.inner());
     let url = Url::parse(&url_str)
         .or_else(|_| Url::parse("about:blank"))
         .map_err(|e| format!("url parse: {e}"))?;
-    let title = lookup_index(strings, *doc.title.inner());
+    let title = lookup_index(strings, *main.title.inner());
 
-    let layout_bbox = build_layout_index(doc);
-    let clickables = extract_clickables(doc, strings, &layout_bbox);
-    let page_stats = build_page_stats(&doc.nodes, &clickables);
+    let mut clickables: Vec<ClickableElement> = Vec::new();
+    let mut total_elements: u32 = 0;
+    for doc in &resp.documents {
+        let layout_bbox = build_layout_index(doc);
+        clickables.extend(extract_clickables(doc, strings, &layout_bbox));
+        total_elements = total_elements.saturating_add(node_count(doc));
+    }
+    for (i, clickable) in clickables.iter_mut().enumerate() {
+        clickable.index = i as u32;
+    }
+    let page_stats = build_page_stats(total_elements, &clickables);
 
     Ok((url, title, clickables, page_stats))
 }
@@ -91,16 +99,19 @@ pub(crate) fn is_clickable(tag: &str, attrs: &[(String, String)]) -> bool {
     false
 }
 
-fn build_page_stats(nodes: &NodeTreeSnapshot, clickables: &[ClickableElement]) -> PageStatistics {
-    let total = nodes.node_name.as_ref().map(|v| v.len()).unwrap_or(0) as u32;
+fn node_count(doc: &DocumentSnapshot) -> u32 {
+    doc.nodes.node_name.as_ref().map(|v| v.len()).unwrap_or(0) as u32
+}
+
+fn build_page_stats(total_elements: u32, clickables: &[ClickableElement]) -> PageStatistics {
     let visible = clickables
         .iter()
         .filter(|c| c.bbox.width > 0.0 && c.bbox.height > 0.0)
         .count() as u32;
     PageStatistics {
-        total_elements: total,
+        total_elements,
         visible_elements: visible,
         text_chars: 0,
-        is_skeleton: total < 5,
+        is_skeleton: total_elements < 5,
     }
 }
