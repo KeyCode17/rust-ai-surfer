@@ -75,6 +75,7 @@ fn params() -> SpawnParams {
         llm: Arc::new(StubLlm),
         registry: Arc::new(ActionRegistry::new()),
         dom_extractor: None,
+        screenshot_sink: None,
         max_steps: 5,
     }
 }

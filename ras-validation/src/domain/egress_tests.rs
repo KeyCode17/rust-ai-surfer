@@ -68,8 +68,8 @@ fn localhost_domain() {
         Err(EgressError::PrivateAddress("localhost".into()))
     );
     assert_eq!(
-        p.check(&url("http://foo.localhost/")),
-        Err(EgressError::PrivateAddress("foo.localhost".into()))
+        p.check(&url("http://app.localhost/")),
+        Err(EgressError::PrivateAddress("app.localhost".into()))
     );
 }
 

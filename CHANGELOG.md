@@ -8,6 +8,28 @@ Versioning policy:
 - **1.0.0** ships when all 11 phases land and `examples/claude_code_oauth_cosmium.rs` runs end-to-end against a live cosmium binary.
 
 ## [Unreleased]
+## [4.3.0] - Per-step screenshots + push-gate hardening
+
+### Added
+
+- **Per-step screenshot sink.** `RunAgent::with_screenshot_sink(...)` captures one screenshot per step once its actions settle. The destination is a port — `ras_agent::StepScreenshotSink` — so a host project can persist to a database or object storage without this workspace taking on a storage dependency. `FolderScreenshotSink` ships as the local-directory default, writing `{root}/{agent_id}/step-{n:04}.png` with step numbers zero-padded so lexicographic order matches run order.
+- `StepRecord.screenshot` carries the stored location rather than inline bytes, keeping history JSON small. The field is `#[serde(default)]`, so history written by earlier versions still deserializes.
+- `SpawnParams.screenshot_sink` threads the sink into sessions, so each spawned agent writes under its own directory.
+
+### Changed
+
+- `RunStep::new` takes a `RunStepDeps` parameter struct instead of seven positional arguments.
+- Screenshot capture and save failures log at `warn` and yield no artifact; a full disk or a dead CDP connection degrades the record, never the run.
+- `scripts/bump-gate.sh` derives the required bump from the commits a branch adds to `origin/main` and fails on a missing, backwards, or wrong-sized change. It previously returned success when the version was unchanged, so pushes landed with no bump at all — the root version had drifted to `2.7.0` while `v4.1.0` was tagged.
+- `scripts/check-commit-msg.sh` rejects `chore(scope)`, `docs(scope)`, the invented `release:` type, capitalized and period-terminated subjects, vague subjects, and AI attribution trailers.
+- Docs sorted into `docs/guides/` and `docs/rfcs/`; README pointed at a specs file that never existed.
+
+### Removed
+
+- `clear_context_cookies` in `ras-cdp`, which had no callers and carried an `allow(dead_code)` to stay quiet. `BrowserPort::clear_cookies` is per-target and backed by `cdp_clear_cookies`.
+
+> Entries for the `3.x` line and `4.0.0`–`4.2.0` are missing from this file; see the [GitHub Releases](https://github.com/KeyCode17/rust-ai-surfer/releases) page for those.
+
 ## [2.1.0] - Dependency patches + publish workflow polish
 
 - Dependabot retargeted at `develop` (matches branch flow); `keyring` major bumps added to ignore list.

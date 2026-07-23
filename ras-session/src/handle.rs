@@ -75,6 +75,9 @@ impl SessionHandle {
         if let Some(dom) = p.dom_extractor.clone() {
             agent = agent.with_dom_extractor(dom);
         }
+        if let Some(sink) = p.screenshot_sink.clone() {
+            agent = agent.with_screenshot_sink(sink);
+        }
         agent.execute().await
     }
 

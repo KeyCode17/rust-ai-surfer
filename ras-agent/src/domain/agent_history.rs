@@ -6,6 +6,7 @@ use url::Url;
 
 use crate::domain::agent_output::AgentOutput;
 use crate::domain::step_metadata::StepMetadata;
+use crate::domain::step_screenshot::StepScreenshot;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct StepRecord {
@@ -17,6 +18,8 @@ pub struct StepRecord {
     pub metadata: StepMetadata,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub summary: Option<BrowserStateSummary>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub screenshot: Option<StepScreenshot>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
