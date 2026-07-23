@@ -10,9 +10,10 @@ use ras_types::{AgentId, StepId, TargetId};
 
 use crate::application::detect_loop::build_empty_action_nudge;
 use crate::application::render_step_message::render_step_message;
-use crate::application::run_step::RunStep;
+use crate::application::run_step::{RunStep, RunStepDeps};
 use crate::domain::agent_history::{AgentHistory, AgentHistoryList, StepRecord};
 use crate::domain::loop_detector::ActionLoopDetector;
+use crate::domain::screenshot_sink::StepScreenshotSink;
 
 const AGENT_OUTPUT_SHAPE: &str = r#"{"current_state":{"evaluation_previous_goal":"...","memory":"...","next_goal":"..."},"action":[{"name":"<action_name>","parameters":{...}}]}"#;
 
@@ -27,6 +28,7 @@ pub struct RunAgent {
     pub browser: Arc<dyn BrowserPort>,
     pub events: Arc<dyn EventBus>,
     pub dom_extractor: Option<Arc<dyn DomExtractor>>,
+    pub screenshot_sink: Option<Arc<dyn StepScreenshotSink>>,
 }
 
 impl RunAgent {
@@ -48,7 +50,15 @@ impl RunAgent {
             browser,
             events,
             dom_extractor: None,
+            screenshot_sink: None,
         }
+    }
+
+    /// Capture one screenshot per step and hand it to `sink`.
+    #[must_use]
+    pub fn with_screenshot_sink(mut self, sink: Arc<dyn StepScreenshotSink>) -> Self {
+        self.screenshot_sink = Some(sink);
+        self
     }
 
     #[must_use]
@@ -76,15 +86,17 @@ impl RunAgent {
     }
 
     pub async fn execute(self) -> Result<AgentHistoryList, AppError> {
-        let runner = RunStep::new(
-            self.primary_llm.clone(),
-            self.fallback_llm.clone(),
-            self.registry.clone(),
-            self.browser.clone(),
-            self.events.clone(),
-            self.dom_extractor.clone(),
-            self.bound_target.clone(),
-        );
+        let runner = RunStep::new(RunStepDeps {
+            agent: self.agent,
+            primary_llm: self.primary_llm.clone(),
+            fallback_llm: self.fallback_llm.clone(),
+            registry: self.registry.clone(),
+            browser: self.browser.clone(),
+            events: self.events.clone(),
+            dom_extractor: self.dom_extractor.clone(),
+            bound_target: self.bound_target.clone(),
+            screenshot_sink: self.screenshot_sink.clone(),
+        });
         let mut detector = ActionLoopDetector::new();
         let mut history = AgentHistory {
             agent: self.agent,

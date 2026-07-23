@@ -1,3 +1,4 @@
+pub mod capture_step_screenshot;
 pub mod clickable_map;
 pub mod compute_action_hash;
 pub mod detect_loop;

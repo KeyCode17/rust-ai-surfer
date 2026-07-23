@@ -8,8 +8,9 @@ use ras_errors::AppError;
 use ras_events::EventBus;
 use ras_llm::{ChatMessage, ChatResponse, InvokeOptions, LlmClient};
 use ras_tools::domain::registry::{ActionRegistry, ToolContext};
-use ras_types::{ActionResult, StepId, TargetId};
+use ras_types::{ActionResult, AgentId, StepId, TargetId};
 
+use crate::application::capture_step_screenshot::capture_step_screenshot;
 use crate::application::clickable_map::build_current_page_message;
 use crate::application::compute_action_hash::compute_action_hash;
 use crate::application::detect_loop::{build_budget_warning, build_loop_nudge};
@@ -19,38 +20,29 @@ use crate::application::run_step_log::{log_action_err, log_action_ok, log_decisi
 use crate::application::salvage::salvage_into;
 use crate::domain::agent_history::StepRecord;
 use crate::domain::loop_detector::ActionLoopDetector;
+use crate::domain::screenshot_sink::StepScreenshotSink;
 use crate::domain::step_metadata::StepMetadata;
 
+pub struct RunStepDeps {
+    pub agent: AgentId,
+    pub primary_llm: Arc<dyn LlmClient>,
+    pub fallback_llm: Option<Arc<dyn LlmClient>>,
+    pub registry: Arc<ActionRegistry>,
+    pub browser: Arc<dyn BrowserPort>,
+    pub events: Arc<dyn EventBus>,
+    pub dom_extractor: Option<Arc<dyn DomExtractor>>,
+    pub bound_target: Option<TargetId>,
+    pub screenshot_sink: Option<Arc<dyn StepScreenshotSink>>,
+}
+
 pub struct RunStep {
-    primary_llm: Arc<dyn LlmClient>,
-    fallback_llm: Option<Arc<dyn LlmClient>>,
-    registry: Arc<ActionRegistry>,
-    browser: Arc<dyn BrowserPort>,
-    events: Arc<dyn EventBus>,
-    dom_extractor: Option<Arc<dyn DomExtractor>>,
-    bound_target: Option<TargetId>,
+    deps: RunStepDeps,
 }
 
 impl RunStep {
     #[must_use]
-    pub fn new(
-        primary: Arc<dyn LlmClient>,
-        fallback: Option<Arc<dyn LlmClient>>,
-        registry: Arc<ActionRegistry>,
-        browser: Arc<dyn BrowserPort>,
-        events: Arc<dyn EventBus>,
-        dom_extractor: Option<Arc<dyn DomExtractor>>,
-        bound_target: Option<TargetId>,
-    ) -> Self {
-        Self {
-            primary_llm: primary,
-            fallback_llm: fallback,
-            registry,
-            browser,
-            events,
-            dom_extractor,
-            bound_target,
-        }
+    pub fn new(deps: RunStepDeps) -> Self {
+        Self { deps }
     }
 
     pub async fn execute(
@@ -68,11 +60,11 @@ impl RunStep {
         if let Some(warn) = build_budget_warning(step.0, max_steps) {
             messages.push(warn);
         }
-        let target = match &self.bound_target {
+        let target = match &self.deps.bound_target {
             Some(t) => Some(t.clone()),
-            None => self.browser.focused_target().await.ok(),
+            None => self.deps.browser.focused_target().await.ok(),
         };
-        let current = match (&self.dom_extractor, &target) {
+        let current = match (&self.deps.dom_extractor, &target) {
             (Some(extractor), Some(t)) => extractor.snapshot(t).await.ok(),
             _ => None,
         };
@@ -89,13 +81,13 @@ impl RunStep {
 
         let response = self.invoke_with_fallback(messages).await?;
         let mut output = parse_agent_output(&response)?;
-        salvage_into(&mut output, &self.registry);
+        salvage_into(&mut output, &self.deps.registry);
         log_decision(step.0, &output);
 
         let mut results = Vec::new();
         for action in &output.action {
             detector.record_action(compute_action_hash(action));
-            let Some(reg) = self.registry.get(&action.name) else {
+            let Some(reg) = self.deps.registry.get(&action.name) else {
                 results.push(ActionResult::err(format!(
                     "unknown action: {}",
                     action.name.0
@@ -104,8 +96,8 @@ impl RunStep {
             };
             let ctx = ToolContext {
                 target: target.clone(),
-                browser: self.browser.clone(),
-                events: self.events.clone(),
+                browser: self.deps.browser.clone(),
+                events: self.deps.events.clone(),
                 page_url: page_url.clone(),
                 available_files: Vec::new(),
                 clickables: pre_clickables.clone(),
@@ -129,7 +121,7 @@ impl RunStep {
             }
         }
 
-        let summary = match (&self.dom_extractor, &target) {
+        let summary = match (&self.deps.dom_extractor, &target) {
             (Some(extractor), Some(t)) => match extractor.snapshot(t).await {
                 Ok(s) => Some(s),
                 Err(e) => {
@@ -137,6 +129,12 @@ impl RunStep {
                     None
                 }
             },
+            _ => None,
+        };
+        let screenshot = match (&self.deps.screenshot_sink, &target) {
+            (Some(sink), Some(t)) => {
+                capture_step_screenshot(&self.deps.browser, sink, self.deps.agent, step, t).await
+            }
             _ => None,
         };
 
@@ -155,6 +153,7 @@ impl RunStep {
             results,
             metadata,
             summary,
+            screenshot,
         })
     }
 
@@ -164,12 +163,13 @@ impl RunStep {
     ) -> Result<ChatResponse, AppError> {
         let opts = InvokeOptions::default();
         match self
+            .deps
             .primary_llm
             .ainvoke(messages.clone(), opts.clone())
             .await
         {
             Ok(r) => Ok(r),
-            Err(e) if should_switch_to_fallback(&e) => match &self.fallback_llm {
+            Err(e) if should_switch_to_fallback(&e) => match &self.deps.fallback_llm {
                 Some(fb) => fb.ainvoke(messages, opts).await,
                 None => Err(e),
             },
