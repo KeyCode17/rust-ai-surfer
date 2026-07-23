@@ -59,7 +59,7 @@ rust-ai-surfer/
 ├── ras-agent/                    ★ orchestrator
 ├── xtask/                        dev automation
 ├── examples/                     ★ claude_code_oauth_cosmium
-├── docs/                         architecture + ADRs
+├── docs/                         adr/ + guides/ + rfcs/
 └── scripts/                      lefthook helpers
 ```
 
@@ -159,7 +159,7 @@ ADRs live in [`docs/adr/`](docs/adr/):
 
 ## Porting status
 
-Feature-for-feature port of [browser-use](https://github.com/browser-use/browser-use) shipped across 11 phases (`0.1.0` → `1.0.0`). The `2.x` line is the post-port stable surface: crates published to crates.io, Rust 1.95 pinned, DOM grounding + real CDP input events landed. The `3.x` line hardened DOM grounding (richer clickable naming) and shipped the **multi-tenant tier** in five phases — `3.2.0` BrowserContext isolation, `3.3.0` egress/SSRF policy, `3.4.0` agent target binding, `3.5.0` event producer, `3.6.0` the `ras-session` SessionManager. **`4.0.0`** marks that tier complete (see the [v4.0.0 release notes](https://github.com/KeyCode17/rust-ai-surfer/releases/tag/v4.0.0) and `docs/superpowers/specs/2026-05-30-multi-tenant-tier-design.md`). The end-to-end OAuth + cosmium path is the verified main course. See [`docs/porting-from-browser-use.md`](docs/porting-from-browser-use.md) for the phase-by-phase map and the naming map between the Python source and the Rust crate layout.
+Feature-for-feature port of [browser-use](https://github.com/browser-use/browser-use) shipped across 11 phases (`0.1.0` → `1.0.0`). The `2.x` line is the post-port stable surface: crates published to crates.io, Rust 1.95 pinned, DOM grounding + real CDP input events landed. The `3.x` line hardened DOM grounding (richer clickable naming) and shipped the **multi-tenant tier** in five phases — `3.2.0` BrowserContext isolation, `3.3.0` egress/SSRF policy, `3.4.0` agent target binding, `3.5.0` event producer, `3.6.0` the `ras-session` SessionManager. **`4.0.0`** marks that tier complete (see the [v4.0.0 release notes](https://github.com/KeyCode17/rust-ai-surfer/releases/tag/v4.0.0) and the phase RFCs in [`docs/rfcs/`](docs/rfcs/)). The end-to-end OAuth + cosmium path is the verified main course. See [`docs/guides/porting-from-browser-use.md`](docs/guides/porting-from-browser-use.md) for the phase-by-phase map and the naming map between the Python source and the Rust crate layout.
 
 ## License
 
