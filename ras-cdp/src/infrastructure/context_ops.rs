@@ -4,7 +4,6 @@ use chromiumoxide::Browser;
 use chromiumoxide::cdp::browser_protocol::browser::{
     BrowserContextId, SetDownloadBehaviorBehavior, SetDownloadBehaviorParams,
 };
-use chromiumoxide::cdp::browser_protocol::storage::ClearCookiesParams;
 use chromiumoxide::cdp::browser_protocol::target::{
     CreateBrowserContextParams, CreateTargetParams, GetTargetsParams,
 };
@@ -77,22 +76,6 @@ pub(crate) async fn list_targets_in(
         .filter(|t| t.r#type == "page")
         .map(|t| TargetId(t.target_id.as_ref().into()))
         .collect())
-}
-
-#[allow(dead_code)]
-pub(crate) async fn clear_context_cookies(
-    browser: &Arc<Mutex<Browser>>,
-    ctx: &ContextId,
-) -> Result<(), AppError> {
-    let params = ClearCookiesParams::builder()
-        .browser_context_id(to_cdp(ctx))
-        .build();
-    let guard = browser.lock().await;
-    guard
-        .execute(params)
-        .await
-        .map_err(|e| AppError::ActionFailed(format!("storage.clearCookies: {e}")))?;
-    Ok(())
 }
 
 async fn set_context_download_dir(
