@@ -7,13 +7,15 @@ read_version() {
         sed -E 's/.*"([^"]+)".*/\1/'
 }
 
-BASE=$(git rev-parse --abbrev-ref --symbolic-full-name '@{upstream}' 2>/dev/null || true)
-if [ -z "$BASE" ] && git rev-parse --verify --quiet origin/main >/dev/null; then
+BASE=""
+if git rev-parse --verify --quiet origin/main >/dev/null; then
     BASE="origin/main"
+elif git rev-parse --abbrev-ref --symbolic-full-name '@{upstream}' >/dev/null 2>&1; then
+    BASE=$(git rev-parse --abbrev-ref --symbolic-full-name '@{upstream}')
 fi
 
-if [ -z "$BASE" ]; then
-    echo "[bump-gate] no upstream to compare against, skipping bump check"
+if [ -z "$BASE" ] || [ "$(git rev-parse HEAD)" = "$(git rev-parse "$BASE")" ]; then
+    echo "[bump-gate] no release base to compare against, skipping bump check"
 else
     COMMITS=$(git log --pretty=format:%s "$BASE..HEAD")
     if [ -z "$COMMITS" ]; then
