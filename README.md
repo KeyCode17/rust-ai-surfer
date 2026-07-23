@@ -18,6 +18,7 @@ Rust port of [browser-use](https://github.com/browser-use/browser-use), driven b
 - **Tools registry** — built-ins (navigate, click_element, click_coordinate, type_text, scroll, screenshot, press_and_hold_element, press_and_hold_coordinate, wait, done), `terminates_sequence` flag, domain filter, per-action timeout. Click + type drive real CDP input events (Input.dispatchMouseEvent / Input.insertText); `navigate` is gated through the egress policy before touching the browser
 - **DOM extraction primitives** — dynamic class filter, stable hash (Sha256 of parent xpath + tag + id + role + filtered classes + ax_name), paint-order rect union, skeleton-page detector
 - **DOM grounding** — `ChromiumoxideDomExtractor` captures a per-step snapshot, the agent gets a numbered clickable map injected into the prompt, and `click_element(list_index)` resolves to a `BackendNodeId` before dispatch. Clickable names are derived from descendant text, `onclick` handler, FontAwesome icon class, and `role` (with CDP-native `isClickable` union); the map keeps up to 200 elements, visible-first on truncation
+- **★ Per-step screenshots (v4.3.0)** — opt-in visual trail of a run. `RunAgent::with_screenshot_sink(...)` captures one screenshot per step once its actions settle, and `StepRecord.screenshot` carries the stored *location* rather than inline bytes so history JSON stays small. The destination is a port (`ras_agent::StepScreenshotSink`), so a host project can persist to a database or object storage without this workspace taking on a storage dependency; `FolderScreenshotSink` ships as the local-directory default. Capture or save failure logs and degrades — a full disk never aborts a run
 - **Watchdogs** — security (allowed/prohibited domains + IPv4/IPv6 block), popups, crash, downloads — backed by an `async-broadcast` event bus
 - **Multi-provider LLMs** — Anthropic + Claude Code OAuth, OpenAI + Azure, Google, Groq, Bedrock, OpenRouter, Vercel, DeepSeek, Cerebras, Mistral, Ollama, OCI, Cloud, LangChain (OpenAI-compatible providers re-export `ChatOpenAICompatible`)
 - **FileSystem** — `BaseFile` per type, RFC 4180 CSV normalize, regex-validated filenames, tokio::fs-backed `LocalFileSystem`
@@ -106,6 +107,43 @@ Output:
 
 Env knobs honored by the example: `RAS_MODEL` (default `claude-sonnet-4-5`), `CDP_URL` (default `http://127.0.0.1:9222`), `TASK` (default heading-extraction on example.com).
 
+### Per-step screenshots
+
+Off unless a sink is attached. The bundled sink writes to a directory you choose:
+
+```rust
+use std::sync::Arc;
+use ras_agent::{FolderScreenshotSink, application::run_agent::RunAgent};
+
+let history = RunAgent::new(task, llm, registry, browser, events)
+    .with_screenshot_sink(Arc::new(FolderScreenshotSink::new("./shots")))
+    .execute()
+    .await?;
+
+for step in &history.last().expect("history").steps {
+    if let Some(shot) = &step.screenshot {
+        println!("step {} -> {}", step.step.0, shot.location);
+    }
+}
+```
+
+Files land at `./shots/<agent-uuid>/step-0000.png`, `step-0001.png`, … — step numbers are zero-padded so lexicographic order matches run order.
+
+To store somewhere else, implement the port and pass your own type instead:
+
+```rust
+#[async_trait]
+impl StepScreenshotSink for S3Sink {
+    async fn save(
+        &self,
+        request: StepScreenshotRequest,
+        bytes: &[u8],
+    ) -> Result<StepScreenshot, AppError> { /* upload, return the object URL */ }
+}
+```
+
+Sessions carry the sink through `SpawnParams.screenshot_sink`, so each spawned agent writes under its own directory.
+
 ## CLI
 
 ```
@@ -119,15 +157,20 @@ ras version
 
 ## Versioning + release flow
 
-| Bump | When |
-|------|------|
-| Major (X) | Architectural overhaul; full ports landed |
-| Minor (Y) | New phase or feature surface |
-| Patch (Z) | Bug fix, CI tweak, dependency pin |
+Every push carries a version bump. `scripts/bump-gate.sh` derives the required size from the commits the branch adds to `origin/main` and fails on a missing, backwards, or wrong-sized change:
+
+| # | Rule | Bump |
+|---|------|------|
+| 1 | Any `type!:` commit — breaking change, architectural overhaul | Major (X) |
+| 2 | Any `feat(...)` commit — new phase or feature surface | Minor (Y) |
+| 3 | Fewer than 5 changed files — bug fix, CI tweak, dependency pin | Patch (Z) |
+| 4 | 5 or more changed files — broad non-feature change | Minor (Y) |
+
+First matching rule wins.
+
+The same gate requires `cargo build --workspace --all-targets`, `cargo test --workspace`, and `ras --help` to pass before a version goes out.
 
 Phase map and full release history in [`CHANGELOG.md`](CHANGELOG.md). Releases on [GitHub Releases](https://github.com/KeyCode17/rust-ai-surfer/releases).
-
-The bump-gate (`scripts/bump-gate.sh`, fired on `git push`) requires `cargo build --workspace --all-targets`, `cargo test --workspace`, and `ras --help` to pass before a tagged version goes out.
 
 ```bash
 cargo run -p xtask -- bump patch       # 1.0.0 -> 1.0.1
@@ -143,8 +186,8 @@ git push --follow-tags
 | Hook | Commands |
 |------|----------|
 | pre-commit | `cargo fmt --check`, `cargo clippy -D clippy::unwrap_used -D clippy::dbg_macro`, ≤200 LOC per file, no `//` comments (only `///` and `//!` doc comments allowed), no `.unwrap()` |
-| commit-msg | Conventional commits (`feat:`, `fix:`, `chore:`, …) |
-| pre-push | `cargo test --workspace --no-fail-fast`, `cargo doc --workspace --no-deps`, bump-gate (only fires on version change) |
+| commit-msg | Conventional commits — `feat`/`fix` require a scope, `chore`/`docs` take none, subject lowercase without a trailing period and ≤72 chars, no AI attribution trailers |
+| pre-push | `cargo test --workspace --no-fail-fast`, `cargo doc --workspace --no-deps`, bump-gate (every push carries a version bump) |
 
 `--no-verify` is not used. If a hook fails, fix the underlying issue.
 
@@ -159,7 +202,7 @@ ADRs live in [`docs/adr/`](docs/adr/):
 
 ## Porting status
 
-Feature-for-feature port of [browser-use](https://github.com/browser-use/browser-use) shipped across 11 phases (`0.1.0` → `1.0.0`). The `2.x` line is the post-port stable surface: crates published to crates.io, Rust 1.95 pinned, DOM grounding + real CDP input events landed. The `3.x` line hardened DOM grounding (richer clickable naming) and shipped the **multi-tenant tier** in five phases — `3.2.0` BrowserContext isolation, `3.3.0` egress/SSRF policy, `3.4.0` agent target binding, `3.5.0` event producer, `3.6.0` the `ras-session` SessionManager. **`4.0.0`** marks that tier complete (see the [v4.0.0 release notes](https://github.com/KeyCode17/rust-ai-surfer/releases/tag/v4.0.0) and the phase RFCs in [`docs/rfcs/`](docs/rfcs/)). The end-to-end OAuth + cosmium path is the verified main course. See [`docs/guides/porting-from-browser-use.md`](docs/guides/porting-from-browser-use.md) for the phase-by-phase map and the naming map between the Python source and the Rust crate layout.
+Feature-for-feature port of [browser-use](https://github.com/browser-use/browser-use) shipped across 11 phases (`0.1.0` → `1.0.0`). The `2.x` line is the post-port stable surface: crates published to crates.io, Rust 1.95 pinned, DOM grounding + real CDP input events landed. The `3.x` line hardened DOM grounding (richer clickable naming) and shipped the **multi-tenant tier** in five phases — `3.2.0` BrowserContext isolation, `3.3.0` egress/SSRF policy, `3.4.0` agent target binding, `3.5.0` event producer, `3.6.0` the `ras-session` SessionManager. **`4.0.0`** marks that tier complete (see the [v4.0.0 release notes](https://github.com/KeyCode17/rust-ai-surfer/releases/tag/v4.0.0) and the phase RFCs in [`docs/rfcs/`](docs/rfcs/)). **`4.3.0`** adds the per-step screenshot sink — a pluggable artifact destination with a local-folder default. The end-to-end OAuth + cosmium path is the verified main course. See [`docs/guides/porting-from-browser-use.md`](docs/guides/porting-from-browser-use.md) for the phase-by-phase map and the naming map between the Python source and the Rust crate layout.
 
 ## License
 
